@@ -105,8 +105,8 @@ public class SwerveModule {
 
 		// Initalize CANcoder
 		//absoluteEncoder = new CANcoder(absoluteEncoderPort);
-		absoluteEncoder = new CANCoder(absoluteEncoderPort);
-		//absoluteEncoder = new CANcoder(absoluteEncoderPort, Constants.kCanivoreCANBusName);
+		//absoluteEncoder = new CANCoder(absoluteEncoderPort);
+		absoluteEncoder = new CANCoder(absoluteEncoderPort, Constants.kCanivoreCANBusName);
 		if(isSim) {
 			simCollection = absoluteEncoder.getSimCollection();
 			//simCollection = absoluteEncoder.getSimState();
