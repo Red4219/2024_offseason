@@ -1,0 +1,97 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.1804150321263607,
+      "y": 5.639318690674419
+    },
+    "rotation": 180.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5 Auto Amp 2 Path 1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Aim"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TimedShootHalfSeconds"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5 Auto Amp 2 Path 2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Aim"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TimedShootHalfSeconds"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5 Auto Amp 2 Path 3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Aim"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TimedShootHalfSeconds"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5 Auto Amp 2 Path 4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5 Auto Amp 2 Path 5"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Aim"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TimedShootHalfSeconds"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}

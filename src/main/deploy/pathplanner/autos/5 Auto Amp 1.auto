@@ -1,0 +1,109 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.2941607706686158,
+      "y": 6.272351390281239
+    },
+    "rotation": -150.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "Aim"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TimedShootHalfSeconds"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5 Auto Amp Path 1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Aim"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TimedShootHalfSeconds"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5 Auto Amp Path 2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Aim"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TimedShootHalfSeconds"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5 Auto Amp Path 3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Aim"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TimedShootHalfSeconds"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5 Auto Amp Path 4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "5 Auto Amp Path 5"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Aim"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TimedShootHalfSeconds"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}
