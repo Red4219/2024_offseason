@@ -182,6 +182,6 @@ build/tmp/
 .DS_Store
 .networktables.json.bck
 networktables.json
-.wpilib/wpilib_preferences.json
+#.wpilib/wpilib_preferences.json
 simgui-ds.json
 simgui.json
