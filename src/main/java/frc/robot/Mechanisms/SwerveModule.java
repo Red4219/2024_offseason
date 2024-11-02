@@ -13,6 +13,7 @@ import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
+import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVPhysicsSim;
 import com.revrobotics.RelativeEncoder;
@@ -38,12 +39,10 @@ import edu.wpi.first.wpilibj.RobotBase;
 public class SwerveModule {
 	/** Creates a new SwerveModule. */
 
-	private final CANSparkMax driveMotor;
+	private final  CANSparkFlex driveMotor;
 	private final CANSparkMax turningMotor;
 
-	//private final CANcoder absoluteEncoder;
 	private final CANCoder absoluteEncoder;
-	//CANcoderSimState simCollection;
 	CANCoderSimCollection simCollection;
 	private final RelativeEncoder driveEncoder;
 
@@ -56,7 +55,6 @@ public class SwerveModule {
 	private Rotation2d _simulatedAbsoluteEncoderRotation2d = new Rotation2d();
 
 	private double m_moduleAngleRadians;
-	//private double m_distanceMeters;
 	private SwerveModuleState optimizedState;
 	private double angularPIDOutput;
 	private double angularFFOutput;
@@ -86,10 +84,10 @@ public class SwerveModule {
 		}
 
 		// Initialize the motors
-		driveMotor = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
+		driveMotor = new CANSparkFlex(driveMotorChannel, MotorType.kBrushless);
 
 		if(isSim) {
-			REVPhysicsSim.getInstance().addSparkMax(driveMotor, 2.6f, 5676);
+			//REVPhysicsSim.getInstance().addSparkMax(driveMotor, 2.6f, 5676);
 		}
 		turningMotor = new CANSparkMax(turningMotorChannel, MotorType.kBrushless);
 
@@ -103,9 +101,6 @@ public class SwerveModule {
 		turningMotor.restoreFactoryDefaults();
 		driveMotor.restoreFactoryDefaults();
 
-		// Initalize CANcoder
-		//absoluteEncoder = new CANcoder(absoluteEncoderPort);
-		//absoluteEncoder = new CANCoder(absoluteEncoderPort);
 		absoluteEncoder = new CANCoder(absoluteEncoderPort, Constants.kCanivoreCANBusName);
 		if(isSim) {
 			simCollection = absoluteEncoder.getSimCollection();
