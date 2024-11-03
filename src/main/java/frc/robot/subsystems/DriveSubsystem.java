@@ -44,6 +44,7 @@ import frc.robot.Tools.PhotonVision;
 import frc.robot.Tools.PhotonVisionResult;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
+import frc.robot.LimelightHelpers;
 import frc.robot.Constants.DriveConstants.kDriveModes;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.SPI;
@@ -78,10 +79,11 @@ public class DriveSubsystem extends SubsystemBase {
 	private boolean isSim = false;
 
 
-	PhotonVisionResult photonVisionResult = null;
+	private PhotonVisionResult photonVisionResult = null;
+	private LimelightHelpers.PoseEstimate limelightMeasurement;
 
 	// Odeometry class for tracking robot pose
-	SwerveDriveOdometry odometry;
+	private SwerveDriveOdometry odometry;
 
 	// test for auto positioning
 	HolonomicDriveController holonomicDriveController = new HolonomicDriveController(
@@ -489,6 +491,20 @@ public class DriveSubsystem extends SubsystemBase {
 						photonPose2d,
 						Timer.getFPGATimestamp() - photonVisionResult.imageCaptureTime(),
 						visionMeasurementStdDevs);
+			}
+		}
+
+		if (Constants.kEnableLimelight) {
+			limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+
+			if(limelightMeasurement != null) {
+				if(limelightMeasurement.tagCount >= 2) {
+     				//poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+     				poseEstimator.addVisionMeasurement(
+         				limelightMeasurement.pose,
+         				limelightMeasurement.timestampSeconds
+					);
+   				}
 			}
 		}
 
