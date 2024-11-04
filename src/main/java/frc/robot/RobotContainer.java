@@ -1,5 +1,7 @@
 package frc.robot;
 
+import java.util.OptionalLong;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -13,6 +15,8 @@ import frc.robot.Tools.PhotonVision;
 import frc.robot.Tools.Parts.PathBuilder;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autonomous.AimCommand;
+import frc.robot.commands.Autonomous.DelayCommand;
+import frc.robot.commands.Autonomous.DummyCommand;
 import frc.robot.commands.Autonomous.IntakeCommand;
 import frc.robot.commands.Autonomous.LockWheelsCommand;
 import frc.robot.subsystems.DriveSubsystem;
@@ -51,16 +55,16 @@ public class RobotContainer {
 		// Configure the trigger bindings
 		configureBindings();
 
-
-		//NamedCommands.registerCommand("Aim", new AimCommand(_photonVision));
-
 		// lock wheels command
 		NamedCommands.registerCommand("LockWheels", new LockWheelsCommand(true));
 		NamedCommands.registerCommand("DisableLockWheels", new LockWheelsCommand(false));
 		NamedCommands.registerCommand("Intake", new IntakeCommand());
+		NamedCommands.registerCommand("Delay500", new DelayCommand(OptionalLong.of(500)));
 
 		if(Constants.kEnablePhotonVision) {
 			NamedCommands.registerCommand("Aim", new AimCommand(photonVision));
+		} else {
+			NamedCommands.registerCommand("Aim", new DummyCommand());
 		}
 		
 		autoChooser = AutoBuilder.buildAutoChooser();

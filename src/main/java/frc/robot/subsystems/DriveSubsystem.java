@@ -73,7 +73,7 @@ public class DriveSubsystem extends SubsystemBase {
 	// Initalizing the gyro sensor
 	private final AHRS gyro = new AHRS(SPI.Port.kMXP); 
 	private final GyroIONavX _gyroIONavX;
-	private AutonomousDetail _autoDetailSelected = null;
+	//private AutonomousDetail _autoDetailSelected = null;
 
 	private double xSpeed = 0.0;
 	private double ySpeed = 0.0;
@@ -83,12 +83,8 @@ public class DriveSubsystem extends SubsystemBase {
 	private int speakerTarget = 0;
 	private boolean targetLocked = false;
 	private boolean isSim = false;
-
-
-
 	private PhotonVisionResult photonVisionResult = null;
 	private LimelightHelpers.PoseEstimate limelightMeasurement = null;
-	private SimDevice limeLightSim = null;
 
 	// Odeometry class for tracking robot pose
 	private SwerveDriveOdometry odometry;
@@ -126,6 +122,8 @@ public class DriveSubsystem extends SubsystemBase {
 	private boolean autoPositionStatusX = false;
 	private boolean autoPositionStatusY = false;
 
+	private SwerveModuleState[] swerveModuleStatesRobotRelative;
+
 	/**
 	* Standard deviations of model states. Increase these numbers to trust your model's state estimates less. This
     * matrix is in the form [x, y, theta]ᵀ, with units in meters and radians, then meters.
@@ -148,7 +146,6 @@ public class DriveSubsystem extends SubsystemBase {
 	public DriveSubsystem() {
 
 		if(Constants.kEnablePhotonVision) {
-			//_photonVision = new PhotonVision();
 			_photonVision = RobotContainer.photonVision;
 		}
 
@@ -267,10 +264,6 @@ public class DriveSubsystem extends SubsystemBase {
 			swerveTab.addBoolean("Target Locked", this::getTargetLocked);
 		}
 	}
-
-	/*public PhotonVision getPhotonVision() {
-		return _photonVision;
-	}*/
 
 	@Override
 	public void periodic() {
@@ -402,7 +395,7 @@ public class DriveSubsystem extends SubsystemBase {
 				}
 			}
 		} else if (mode == kDriveModes.LOCK_WHEELS) {
-			//this.lockWheels();
+			lockWheels();
 			return;
 		}
 
@@ -416,11 +409,11 @@ public class DriveSubsystem extends SubsystemBase {
 		return ChassisSpeeds.fromRobotRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d());
 	}
 
-	public void setChassisSpeedsRobotRelative(ChassisSpeeds chassisSpeeds ){
+	public void setChassisSpeedsRobotRelative(ChassisSpeeds chassisSpeeds ) {
 
 		chassisSpeeds = ChassisSpeeds.discretize(chassisSpeeds, 0.02);
 
-		SwerveModuleState[] swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
+		swerveModuleStatesRobotRelative = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
 
 		if(isSim) {
 			int dev = SimDeviceDataJNI.getSimDeviceHandle("navX-Sensor[0]");
@@ -428,12 +421,12 @@ public class DriveSubsystem extends SubsystemBase {
 			angle.set(angle.get() + -chassisSpeeds.omegaRadiansPerSecond);
 		}
 
-		frontLeft.setDesiredState(swerveModuleStates[0]);
-		frontRight.setDesiredState(swerveModuleStates[1]);
-		rearLeft.setDesiredState(swerveModuleStates[2]);
-		rearRight.setDesiredState(swerveModuleStates[3]);
+		frontLeft.setDesiredState(swerveModuleStatesRobotRelative[0]);
+		frontRight.setDesiredState(swerveModuleStatesRobotRelative[1]);
+		rearLeft.setDesiredState(swerveModuleStatesRobotRelative[2]);
+		rearRight.setDesiredState(swerveModuleStatesRobotRelative[3]);
 
-		Logger.recordOutput("SwerveModuleStates/Setpoints", swerveModuleStates);
+		Logger.recordOutput("SwerveModuleStates/Setpoints", swerveModuleStatesRobotRelative);
 	}
 
 	public void setModuleStates(SwerveModuleState[] desiredStates) {

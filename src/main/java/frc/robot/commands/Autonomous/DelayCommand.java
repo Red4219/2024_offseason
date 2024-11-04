@@ -22,6 +22,7 @@ public class DelayCommand extends Command {
             TimerTask task = new TimerTask() {
                 public void run() {
                     System.out.println("stopping the delay");
+                    finished = true;
                 }
             };
             Timer timer = new Timer("Timer");

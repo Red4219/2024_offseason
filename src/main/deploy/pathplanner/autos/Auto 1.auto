@@ -18,6 +18,18 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "LockWheels"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Delay500"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Auto 1 Path 2"
