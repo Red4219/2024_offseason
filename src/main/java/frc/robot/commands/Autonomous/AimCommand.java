@@ -14,14 +14,9 @@ public class AimCommand extends Command {
     private int _targedNumber = 7;
 
     public AimCommand(PhotonVision photonVision) {
-
-        /*if(Constants.kEnableArm) {
-            _driveSubsystem = RobotContainer.driveSubsystem;
-
-		    addRequirements(_driveSubsystem);
-
-            _photonVision = photonVision;
-        }*/
+         _driveSubsystem = RobotContainer.driveSubsystem;
+         addRequirements(_driveSubsystem);
+         _photonVision = photonVision;
     }
 
     @Override
@@ -37,7 +32,7 @@ public class AimCommand extends Command {
 
     @Override
     public void execute() {
-        System.out.println("calling aim command");
+        //System.out.println("calling aim command");
     }
 
     @Override
@@ -57,6 +52,11 @@ public class AimCommand extends Command {
     public boolean isFinished() {
 
         if(!Constants.kEnablePhotonVision) {
+            return true;
+        }
+
+        if(_photonVision == null) {
+            System.out.println("AimCommand::isFinished() - _photonVision is null");
             return true;
         }
 

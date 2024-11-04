@@ -12,17 +12,22 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Tools.JoystickUtils;
+import frc.robot.Tools.Limelight;
 import frc.robot.Tools.PhotonVision;
 import frc.robot.Tools.Parts.PathBuilder;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.Autonomous.AimCommand;
+import frc.robot.commands.Autonomous.IntakeCommand;
 import frc.robot.commands.Autonomous.LockWheelsCommand;
+import frc.robot.commands.Autonomous.IntakeCommand;
 import frc.robot.subsystems.DriveSubsystem;
 
 public class RobotContainer {
 
 	public static final DriveSubsystem driveSubsystem = new DriveSubsystem();
 	public PhotonVision _photonVision = driveSubsystem.getPhotonVision();
-	private static final CommandXboxController operatorController = new CommandXboxController(1);
+	public static final Limelight limelight = new Limelight();
+	//private static final CommandXboxController operatorController = new CommandXboxController(1);
 
 	
 	// This is required by pathplanner
@@ -54,11 +59,17 @@ public class RobotContainer {
 		// lock wheels command
 		NamedCommands.registerCommand("LockWheels", new LockWheelsCommand(true));
 		NamedCommands.registerCommand("DisableLockWheels", new LockWheelsCommand(false));
+		NamedCommands.registerCommand("Intake", new IntakeCommand());
+
+		if(Constants.kEnablePhotonVision) {
+			NamedCommands.registerCommand("Aim", new AimCommand(_photonVision));
+		}
 		
 		autoChooser = AutoBuilder.buildAutoChooser();
 
 		// region Def Auto
 		Shuffleboard.getTab("Autonomous").add("Auto", autoChooser);
+
 	}
 
 	private void configureBindings() {
@@ -78,9 +89,7 @@ public class RobotContainer {
 				new RunCommand(() -> driveSubsystem.drive(
 					JoystickUtils.processJoystickInput(driverController.getLeftY()),
 					JoystickUtils.processJoystickInput(driverController.getLeftX()),
-					-JoystickUtils.processJoystickInput(driverController.getRightX()),
-					true,
-					false
+					-JoystickUtils.processJoystickInput(driverController.getRightX())
 				),
 				driveSubsystem
 			)

@@ -36,7 +36,7 @@ public final class Constants {
 	public static boolean enableLogger = false;
 	public static boolean debugPhotonVision = false;
 	public static boolean kEnablePhotonVision = false;
-	public static boolean kEnableLimelight = true;
+	public static boolean kEnableLimelight = false;
 	public static boolean kDebugLimelight = false;
 
 	public static class ModuleConstants {
@@ -93,10 +93,10 @@ public final class Constants {
 	}
 
 	public static class DriveConstants {
-		public static final double kMaxSpeedMetersPerSecond = 4.5;
+		//public static final double kMaxSpeedMetersPerSecond = 4.5;
 
 		// this sets turning speed (keep this low)
-		public static final double kMaxRPM = 10;
+		//public static final double kMaxRPM = 10;
 		public static final double kBumperToBumperWidth = Units.inchesToMeters(31);
 
 		public static final double kTrackWidth = Units.inchesToMeters(32); // in meters!

@@ -40,6 +40,7 @@ public class SwerveModule {
 	/** Creates a new SwerveModule. */
 
 	private final  CANSparkFlex driveMotor;
+	//private final  CANSparkMax driveMotor;
 	private final CANSparkMax turningMotor;
 
 	private final CANCoder absoluteEncoder;
@@ -85,6 +86,7 @@ public class SwerveModule {
 
 		// Initialize the motors
 		driveMotor = new CANSparkFlex(driveMotorChannel, MotorType.kBrushless);
+		//driveMotor = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
 
 		if(isSim) {
 			//REVPhysicsSim.getInstance().addSparkMax(driveMotor, 2.6f, 5676);

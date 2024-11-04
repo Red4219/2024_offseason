@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import java.util.ArrayList;
 import org.littletonrobotics.junction.Logger;
+
+import edu.wpi.first.hal.SimDevice;
 import edu.wpi.first.hal.SimDouble;
 import edu.wpi.first.hal.simulation.SimDeviceDataJNI;
 import edu.wpi.first.math.VecBuilder;
@@ -32,6 +34,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.simulation.SimDeviceSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -46,6 +49,8 @@ import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
 import frc.robot.LimelightHelpers;
 import frc.robot.Constants.DriveConstants.kDriveModes;
+
+import com.ctre.phoenix.led.ColorFlowAnimation.Direction;
 import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -62,7 +67,7 @@ public class DriveSubsystem extends SubsystemBase {
 	private final SwerveModule rearRight;
 
 	private SwerveModulePosition[] swervePosition;
-	SwerveModuleState[] swerveModuleStates;
+	private SwerveModuleState[] swerveModuleStates;
 
 	// Initalizing the gyro sensor
 	private final AHRS gyro = new AHRS(SPI.Port.kMXP); 
@@ -79,14 +84,16 @@ public class DriveSubsystem extends SubsystemBase {
 	private boolean isSim = false;
 
 
+
 	private PhotonVisionResult photonVisionResult = null;
-	private LimelightHelpers.PoseEstimate limelightMeasurement;
+	private LimelightHelpers.PoseEstimate limelightMeasurement = null;
+	private SimDevice limeLightSim = null;
 
 	// Odeometry class for tracking robot pose
 	private SwerveDriveOdometry odometry;
 
 	// test for auto positioning
-	HolonomicDriveController holonomicDriveController = new HolonomicDriveController(
+	private HolonomicDriveController holonomicDriveController = new HolonomicDriveController(
 		new PIDController(1, 0, 0),
 		new PIDController(1, 0, 0),
 		new ProfiledPIDController(
@@ -100,8 +107,8 @@ public class DriveSubsystem extends SubsystemBase {
 		)
 	);
 
-	Trajectory trajectory = null;
-	Trajectory.State goal = null;
+	private Trajectory trajectory = null;
+	private Trajectory.State goal = null;
 
 	// PID controller for gyro turning
 	private ProfiledPIDController gyroTurnPidController;
@@ -111,13 +118,12 @@ public class DriveSubsystem extends SubsystemBase {
 	private SwerveDrivePoseEstimator poseEstimator;
 
 	private PhotonVision _photonVision;
-	Pose2d photonPose2d;
+	private Pose2d photonPose2d;
 
-	double autoX_Position = 0.0;
-	double autoY_Position = 0.0;
-	boolean autoPositionStatusX = false;
-	boolean autoPositionStatusY = false;
-	String alliance = "";
+	private double autoX_Position = 0.0;
+	private double autoY_Position = 0.0;
+	private boolean autoPositionStatusX = false;
+	private boolean autoPositionStatusY = false;
 
 	/**
 	* Standard deviations of model states. Increase these numbers to trust your model's state estimates less. This
@@ -135,7 +141,7 @@ public class DriveSubsystem extends SubsystemBase {
 		Constants.PhotonVisionConstants.visionMeasurementStdDevsTheta
 	);
 
-	private NetworkTableInstance networkTableInstance = NetworkTableInstance.getDefault();
+	//private NetworkTableInstance networkTableInstance = NetworkTableInstance.getDefault();
 
 	/** Creates a new DriveSubsystem. */
 	public DriveSubsystem() {
@@ -337,10 +343,9 @@ public class DriveSubsystem extends SubsystemBase {
 	}
 	
 	public void lockWheels() {
-		double rot = 0;
 
 		swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
-				new ChassisSpeeds(0, 0, rot));
+				new ChassisSpeeds(0, 0, 0));
 
 		SwerveDriveKinematics.desaturateWheelSpeeds(
 				swerveModuleStates, 0);
@@ -354,22 +359,22 @@ public class DriveSubsystem extends SubsystemBase {
 		setFieldCentric(true);
 	}
 
-	public void drive(double xSpeed, double ySpeed, double rot) {
+	/*public void drive(double xSpeed, double ySpeed, double rot) {
 		drive(xSpeed, ySpeed, rot, false, false);
-	}
+	}*/
 
-	public void drive(double xSpeed, double ySpeed, double rot, boolean isTurbo, boolean isSneak) {
+	public void drive(double xSpeed, double ySpeed, double rot) {
 
 		// Apply deadbands to inputs
-		xSpeed *= DriveConstants.kMaxSpeedMetersPerSecond;
-		ySpeed *= DriveConstants.kMaxSpeedMetersPerSecond;
+		//xSpeed *= DriveConstants.kMaxSpeedMetersPerSecond;
+		//ySpeed *= DriveConstants.kMaxSpeedMetersPerSecond;
 
-		if (gyroTurning) {
+		/*if (gyroTurning) {
 			targetRotationDegrees += rot;
 			rot = gyroTurnPidController.calculate(getHeading360(), targetRotationDegrees);
 		} else {
 			rot *= DriveConstants.kMaxRPM;
-		}
+		}*/
 
 		this.xSpeed = xSpeed;
 		this.ySpeed = ySpeed;
@@ -495,7 +500,12 @@ public class DriveSubsystem extends SubsystemBase {
 		}
 
 		if (Constants.kEnableLimelight) {
-			limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+
+			if(DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
+				limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");	
+			} else {
+				limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiRed("limelight");	
+			}
 
 			if(limelightMeasurement != null) {
 				if(limelightMeasurement.tagCount >= 2) {
