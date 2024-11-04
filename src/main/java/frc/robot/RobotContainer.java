@@ -1,16 +1,12 @@
 package frc.robot;
 
-import java.util.OptionalLong;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Tools.JoystickUtils;
 import frc.robot.Tools.Limelight;
 import frc.robot.Tools.PhotonVision;
@@ -19,12 +15,13 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autonomous.AimCommand;
 import frc.robot.commands.Autonomous.IntakeCommand;
 import frc.robot.commands.Autonomous.LockWheelsCommand;
-import frc.robot.commands.Autonomous.IntakeCommand;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 
 public class RobotContainer {
 
 	public static final DriveSubsystem driveSubsystem = new DriveSubsystem();
+	public static final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
 	public PhotonVision _photonVision = driveSubsystem.getPhotonVision();
 	public static final Limelight limelight = new Limelight();
 	//private static final CommandXboxController operatorController = new CommandXboxController(1);

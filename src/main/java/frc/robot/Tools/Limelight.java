@@ -10,17 +10,9 @@ import frc.robot.LimelightHelpers.PoseEstimate;
 public class Limelight {
     private PoseEstimate limelightMeasurement = null;
     private boolean isSim = false;
-    private SimDevice limeLightSim = null;
-    private SimBoolean simTest = null;;
 
     public Limelight() {
-        limeLightSim = SimDevice.create("Limelight", 1);
-		simTest = limeLightSim.createBoolean("found", edu.wpi.first.hal.SimDevice.Direction.kBidir, false);
-    }
-
-    public boolean test() {
-
-        return simTest.get();
+        
     }
 
     public PoseEstimate getResult() {

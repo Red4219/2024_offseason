@@ -2,12 +2,14 @@ package frc.robot.commands.Autonomous;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
-import frc.robot.Tools.Limelight;
+import frc.robot.subsystems.IntakeSubsystem;
 
 public class IntakeCommand extends Command{
-    private Limelight limelight = RobotContainer.limelight;
+    private IntakeSubsystem intakeSubsystem = RobotContainer.intakeSubsystem;
 
     public IntakeCommand() {
+
+        addRequirements(intakeSubsystem);
     }
 
     @Override
@@ -25,6 +27,6 @@ public class IntakeCommand extends Command{
 
     @Override
     public boolean isFinished() {
-        return limelight.test();
+        return intakeSubsystem.hasItem();
     }
 }

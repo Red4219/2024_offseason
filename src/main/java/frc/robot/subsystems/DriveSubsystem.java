@@ -288,12 +288,12 @@ public class DriveSubsystem extends SubsystemBase {
 		SmartDashboard.putData("field", field);
 	}
 
-	public void setAutoCommandSelected(Command autoCommand) {
+	/*public void setAutoCommandSelected(Command autoCommand) {
 		if(autoCommand != null) {
 			_autoDetailSelected = Constants.AutonomousRoutines.get(autoCommand.getName());
 			System.out.println("auto selected: " + autoCommand.getName());
 		}
-	}
+	}*/
 
 	// region getters
 	public double getHeading() {
