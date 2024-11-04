@@ -48,6 +48,7 @@ import frc.robot.Tools.PhotonVisionResult;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
 import frc.robot.LimelightHelpers;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.DriveConstants.kDriveModes;
 
 import com.ctre.phoenix.led.ColorFlowAnimation.Direction;
@@ -147,7 +148,8 @@ public class DriveSubsystem extends SubsystemBase {
 	public DriveSubsystem() {
 
 		if(Constants.kEnablePhotonVision) {
-			_photonVision = new PhotonVision();
+			//_photonVision = new PhotonVision();
+			_photonVision = RobotContainer.photonVision;
 		}
 
 		if(RobotBase.isReal()) {
@@ -266,9 +268,9 @@ public class DriveSubsystem extends SubsystemBase {
 		}
 	}
 
-	public PhotonVision getPhotonVision() {
+	/*public PhotonVision getPhotonVision() {
 		return _photonVision;
-	}
+	}*/
 
 	@Override
 	public void periodic() {

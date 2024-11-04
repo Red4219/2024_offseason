@@ -20,9 +20,10 @@ import frc.robot.subsystems.IntakeSubsystem;
 
 public class RobotContainer {
 
+	//public PhotonVision _photonVision = driveSubsystem.getPhotonVision();
+	public static final PhotonVision photonVision = new PhotonVision();
 	public static final DriveSubsystem driveSubsystem = new DriveSubsystem();
 	public static final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
-	public PhotonVision _photonVision = driveSubsystem.getPhotonVision();
 	public static final Limelight limelight = new Limelight();
 	//private static final CommandXboxController operatorController = new CommandXboxController(1);
 
@@ -59,7 +60,7 @@ public class RobotContainer {
 		NamedCommands.registerCommand("Intake", new IntakeCommand());
 
 		if(Constants.kEnablePhotonVision) {
-			NamedCommands.registerCommand("Aim", new AimCommand(_photonVision));
+			NamedCommands.registerCommand("Aim", new AimCommand(photonVision));
 		}
 		
 		autoChooser = AutoBuilder.buildAutoChooser();

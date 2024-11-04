@@ -69,7 +69,7 @@ public class PhotonVision {
 
 		if (Constants.kEnablePhotonVision) {
 
-			if(RobotBase.isReal()) {
+			if (RobotBase.isReal()) {
 				isSim = false;
 			} else {
 				isSim = true;
@@ -132,119 +132,118 @@ public class PhotonVision {
 				// photonVisionTab.addDouble("Target Used", this::getTargetUsed);
 				photonVisionTab.addDouble("Speaker ID", this::getSpeakerTarget);
 			}
-		}
 
-		Thread thread = new Thread() {
-			public void run() {
+			Thread thread = new Thread() {
+				public void run() {
 
-				while (true) {
-					//System.out.println("calling from inside the thread");
+					while (true) {
+						// System.out.println("calling from inside the thread");
 
-					if(isSim) {
-						// Update PhotonVision based on our new robot position.
-						//_simVisionSystem.processFrame(prevEstimatedRobotPose);
+						if (isSim) {
+							// Update PhotonVision based on our new robot position.
+							// _simVisionSystem.processFrame(prevEstimatedRobotPose);
 
-						if(prevEstimatedRobotPose == null) {
+							if (prevEstimatedRobotPose == null) {
+								prevEstimatedRobotPose = new Pose2d();
+							}
+
+							_visionSystemSim.update(prevEstimatedRobotPose);
+						}
+
+						if (prevEstimatedRobotPose == null) {
+							System.out.println("PhonVision::getPose() - prevEstimatedRobotPose is null");
 							prevEstimatedRobotPose = new Pose2d();
 						}
 
-						_visionSystemSim.update(prevEstimatedRobotPose);
-					}
+						try {
+							result = _camera.getLatestResult();
+							targets = result.getTargets();
+							_targetsUsed = new int[targets.size()];
 
-					if(prevEstimatedRobotPose == null) {
-	 					System.out.println("PhonVision::getPose() - prevEstimatedRobotPose is null");
-	 					prevEstimatedRobotPose = new Pose2d();
-	 				}
+							// List<Pose3d> allTagPoses = new ArrayList<>();
+							allTagPoses.clear();
 
-					try {
-						result = _camera.getLatestResult();
-						targets = result.getTargets();
-						_targetsUsed = new int[targets.size()];
-
-						//List<Pose3d> allTagPoses = new ArrayList<>();
-						allTagPoses.clear();
-
-						int i = 0;
-						for (PhotonTrackedTarget target : targets) {
-							allTagPoses.add(
-									_aprilTagFieldLayout.getTagPose(target.getFiducialId()).get());
-
-							_targetsUsed[i] = target.getFiducialId();
-							i++;
-						}
-
-						///////////////
-
-						Logger.recordOutput(
-							"AprilTagVision/TargetsUsed",
-							allTagPoses.toArray(new Pose3d[allTagPoses.size()])
-						);
-
-						/////////
-
-						Optional<EstimatedRobotPose> o = getPhotonPose(prevEstimatedRobotPose);
-
-						if (o.isPresent()) {
-
-							// System.out.println("PhonVision::getPose() - it is present");
-
-							//estimatedRobotPose = o.get();
-							//_estimatedRobotPose = estimatedRobotPose;
-							_estimatedRobotPose = o.get();
-
-							for (PhotonTrackedTarget target : _estimatedRobotPose.targetsUsed) {
+							int i = 0;
+							for (PhotonTrackedTarget target : targets) {
 								allTagPoses.add(
-							 		_aprilTagFieldLayout.getTagPose(target.getFiducialId()).get()
-								);
+										_aprilTagFieldLayout.getTagPose(target.getFiducialId()).get());
+
+								_targetsUsed[i] = target.getFiducialId();
+								i++;
 							}
 
-							/*Logger.recordOutput(
-									"AprilTagVision/TagPoses",
-									allTagPoses.toArray(new Pose3d[allTagPoses.size()]));*/
+							///////////////
 
-							// return new PhotonVisionResult(true, estimatedRobotPose.estimatedPose,
-							// estimatedRobotPose.timestampSeconds);
-
-							prevPhotonEstimatedPose = _estimatedRobotPose.estimatedPose.toPose2d();
-
-							photonVisionResult
-								.setTargetFound(true)
-								.setImageCaptureTime(_estimatedRobotPose.timestampSeconds)
-								.setPose2d(prevPhotonEstimatedPose);
-
-							//photonVisionResult = new PhotonVisionResult(true, _estimatedRobotPose.estimatedPose,
-							//	_estimatedRobotPose.timestampSeconds);
-							
-							
-
-							Logger.recordOutput("PhotonVisionEstimator/Robot", prevPhotonEstimatedPose);
-
-						} else {
-							// System.out.println("PhonVision::getPose() - I don't see any tags");
-							// Since we do not have any tags that we can see, blank out the list
-							//System.out.println("we do not have a pose");
 							Logger.recordOutput(
-									"AprilTagVision/TagPoses",
+									"AprilTagVision/TargetsUsed",
 									allTagPoses.toArray(new Pose3d[allTagPoses.size()]));
+
+							/////////
+
+							Optional<EstimatedRobotPose> o = getPhotonPose(prevEstimatedRobotPose);
+
+							if (o.isPresent()) {
+
+								// System.out.println("PhonVision::getPose() - it is present");
+
+								// estimatedRobotPose = o.get();
+								// _estimatedRobotPose = estimatedRobotPose;
+								_estimatedRobotPose = o.get();
+
+								for (PhotonTrackedTarget target : _estimatedRobotPose.targetsUsed) {
+									allTagPoses.add(
+											_aprilTagFieldLayout.getTagPose(target.getFiducialId()).get());
+								}
+
+								/*
+								 * Logger.recordOutput(
+								 * "AprilTagVision/TagPoses",
+								 * allTagPoses.toArray(new Pose3d[allTagPoses.size()]));
+								 */
+
+								// return new PhotonVisionResult(true, estimatedRobotPose.estimatedPose,
+								// estimatedRobotPose.timestampSeconds);
+
+								prevPhotonEstimatedPose = _estimatedRobotPose.estimatedPose.toPose2d();
+
+								photonVisionResult
+										.setTargetFound(true)
+										.setImageCaptureTime(_estimatedRobotPose.timestampSeconds)
+										.setPose2d(prevPhotonEstimatedPose);
+
+								// photonVisionResult = new PhotonVisionResult(true,
+								// _estimatedRobotPose.estimatedPose,
+								// _estimatedRobotPose.timestampSeconds);
+
+								Logger.recordOutput("PhotonVisionEstimator/Robot", prevPhotonEstimatedPose);
+
+							} else {
+								// System.out.println("PhonVision::getPose() - I don't see any tags");
+								// Since we do not have any tags that we can see, blank out the list
+								// System.out.println("we do not have a pose");
+								Logger.recordOutput(
+										"AprilTagVision/TagPoses",
+										allTagPoses.toArray(new Pose3d[allTagPoses.size()]));
+							}
+
+							///////////////
+
+						} catch (Exception e) {
+							e.printStackTrace();
+							System.out.println(e);
 						}
 
-						///////////////
-
-					} catch (Exception e) {
-						e.printStackTrace();
-						System.out.println(e);
-					}
-
-					try {
-						Thread.sleep(5);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
+						try {
+							Thread.sleep(5);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
 					}
 				}
-			}
-		};
-		
-		thread.start();
+			};
+
+			thread.start();
+		}
 	}
 
 	public boolean isConnected() {
