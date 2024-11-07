@@ -11,12 +11,13 @@ public class IntakeSubsystem extends SubsystemBase {
     private SimBoolean simTest = null;;
 
     public IntakeSubsystem() {
-        limeLightSim = SimDevice.create("Limelight", 1);
-		simTest = limeLightSim.createBoolean("found", edu.wpi.first.hal.SimDevice.Direction.kBidir, false);
+        //limeLightSim = SimDevice.create("Limelight", 1);
+		//simTest = limeLightSim.createBoolean("found", edu.wpi.first.hal.SimDevice.Direction.kBidir, false);
     }
 
     public boolean hasItem() {
-        return simTest.get();
+        //return simTest.get();
+        return false;
     }
 
     @Override
