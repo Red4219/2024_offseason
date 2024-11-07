@@ -165,7 +165,8 @@ public class DriveSubsystem extends SubsystemBase {
 				ModuleConstants.kFrontLeftTurningEncoderPort,
 				ModuleConstants.kFrontLeftAngleZero,
 				ModuleConstants.kModuleTurningGains,
-				ModuleConstants.kModuleDriveGains
+				ModuleConstants.kModuleDriveGains,
+				false
 			);
 
 		frontRight = new SwerveModule(
@@ -175,7 +176,8 @@ public class DriveSubsystem extends SubsystemBase {
 				ModuleConstants.kFrontRightTurningEncoderPort,
 				ModuleConstants.kFrontRightAngleZero,
 				ModuleConstants.kModuleTurningGains,
-				ModuleConstants.kModuleDriveGains
+				ModuleConstants.kModuleDriveGains,
+				true
 			);
 
 		rearLeft = new SwerveModule(
@@ -185,7 +187,8 @@ public class DriveSubsystem extends SubsystemBase {
 				ModuleConstants.kRearLeftTurningEncoderPort,
 				ModuleConstants.kRearLeftAngleZero,
 				ModuleConstants.kModuleTurningGains,
-				ModuleConstants.kModuleDriveGains
+				ModuleConstants.kModuleDriveGains,
+				false
 			);
 
 		rearRight = new SwerveModule(
@@ -195,7 +198,8 @@ public class DriveSubsystem extends SubsystemBase {
 				ModuleConstants.kRearRightTurningEncoderPort,
 				ModuleConstants.kRearRightAngleZero,
 				ModuleConstants.kModuleTurningGains,
-				ModuleConstants.kModuleDriveGains
+				ModuleConstants.kModuleDriveGains,
+				false
 			);
 
 		swervePosition = new SwerveModulePosition[] {

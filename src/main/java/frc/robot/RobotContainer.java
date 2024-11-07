@@ -24,7 +24,6 @@ import frc.robot.subsystems.IntakeSubsystem;
 
 public class RobotContainer {
 
-	//public PhotonVision _photonVision = driveSubsystem.getPhotonVision();
 	public static final PhotonVision photonVision = new PhotonVision();
 	public static final DriveSubsystem driveSubsystem = new DriveSubsystem();
 	public static final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
@@ -45,8 +44,6 @@ public class RobotContainer {
 		return autoChooser;
 	}
 
-	Command _autoCommand = null;
-
 	/**
 	 * The container for the robot. Contains subsystems, OI devices, and commands.
 	 */
@@ -55,7 +52,8 @@ public class RobotContainer {
 		// Configure the trigger bindings
 		configureBindings();
 
-		// lock wheels command
+		
+		// Register commands to be used in Auto
 		NamedCommands.registerCommand("LockWheels", new LockWheelsCommand(true));
 		NamedCommands.registerCommand("DisableLockWheels", new LockWheelsCommand(false));
 		NamedCommands.registerCommand("Intake", new IntakeCommand());
@@ -67,9 +65,10 @@ public class RobotContainer {
 			NamedCommands.registerCommand("Aim", new DummyCommand());
 		}
 		
+		// This creates the chooser from the autos built in Autonomous
 		autoChooser = AutoBuilder.buildAutoChooser();
 
-		// region Def Auto
+		// Add the chooser to the Shuffleboard to select which Auo to run
 		Shuffleboard.getTab("Autonomous").add("Auto", autoChooser);
 
 	}

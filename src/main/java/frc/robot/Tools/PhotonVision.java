@@ -67,8 +67,10 @@ public class PhotonVision {
 	
 	public PhotonVision() {
 
+		// Is PhotonVision Enabled?
 		if (Constants.kEnablePhotonVision) {
 
+			// Is this a simulation?
 			if (RobotBase.isReal()) {
 				isSim = false;
 			} else {
@@ -78,11 +80,13 @@ public class PhotonVision {
 			_camera = new PhotonCamera(PhotonVisionConstants.CameraName);
 
 			try {
+				// This sets up the field with the correct Apriltags in the proper places
+				// These values are used later for aiming and localization
 				_aprilTagFieldLayout = AprilTagFieldLayout
 						.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
 
 				// Set if we are blue or red
-
+				// Set the origin accordingly
 				if (DriverStation.getAlliance().isPresent()) {
 
 					if (DriverStation.getAlliance().get() == Alliance.Blue) {
@@ -94,18 +98,19 @@ public class PhotonVision {
 					_aprilTagFieldLayout.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide);
 				}
 
-				// photonVisionTab = Shuffleboard.getTab("PhotonVision");
 			} catch (IOException e) {
 				System.out.println("PhotonVision::PhotonVision() - error:" + e.toString());
 				return;
 			}
 
 			// Change this for testing
-			if (isSim && !PhotonVisionConstants.PhysicalCamera) {
+			/*if (isSim && !PhotonVisionConstants.PhysicalCamera) {
 				System.out.println("running setupSimulation()");
 				setupSimulation(new Pose3d());
-			}
+			}*/
 
+			// If the field layout is created and valid and the camera is created and connected
+			// create the photon pose estimator.  It is where photonvision thinks the robot is.
 			if (_aprilTagFieldLayout != null) {
 				if (_camera != null) {
 					if (_camera.isConnected()) {
@@ -115,13 +120,14 @@ public class PhotonVision {
 								_camera,
 								Constants.PhotonVisionConstants.cameraToRobot);
 					} else {
-						System.out.println("-------> the camera is not connected");
+						System.out.println("PhotonVision::PhotonVision() - the camera is not connected");
 					}
 				} else {
 					System.out.println("PhotonVision::PhotonVision() - _camera is null");
 				}
 			}
 
+			// Create the elements in Shuffleboard for debugging if debugPhotonVision is true 
 			if (Constants.debugPhotonVision == true) {
 				photonVisionTab = Shuffleboard.getTab("PhotonVision");
 
@@ -133,15 +139,15 @@ public class PhotonVision {
 				photonVisionTab.addDouble("Speaker ID", this::getSpeakerTarget);
 			}
 
+			// Start a new thread that runs faster ~10 milliseconds instead of ~20 milliseconds
 			Thread thread = new Thread() {
 				public void run() {
 
 					while (true) {
-						// System.out.println("calling from inside the thread");
 
 						if (isSim) {
 							// Update PhotonVision based on our new robot position.
-							// _simVisionSystem.processFrame(prevEstimatedRobotPose);
+							//_simVisionSystem.processFrame(prevEstimatedRobotPose);
 
 							if (prevEstimatedRobotPose == null) {
 								prevEstimatedRobotPose = new Pose2d();
@@ -246,6 +252,7 @@ public class PhotonVision {
 		}
 	}
 
+	// Is the camera connected?
 	public boolean isConnected() {
 		if(Constants.kEnablePhotonVision) {
 			if(_camera != null) {
@@ -258,12 +265,14 @@ public class PhotonVision {
 		}
 	}
 
+	// Get the pose/location on the field that photonvision thinks the robot is at
 	public PhotonVisionResult getPose(Pose2d prevEstimatedRobotPose) {
 		this.prevEstimatedRobotPose = prevEstimatedRobotPose;
 		
 		return new PhotonVisionResult(true, _estimatedRobotPose.estimatedPose.toPose2d(), _estimatedRobotPose.timestampSeconds);
 	}
 
+	// Set the reference 2D (X,Y) pose/position for PhotonVision to use
 	public void setReferencePose(Pose2d referencePose) {
 		
 		if(_photonPoseEstimator != null) {
@@ -271,12 +280,14 @@ public class PhotonVision {
 		}
 	}
 
+	// Set the reference 3D (X,Y,Z) pose/position for PhotonVision to use
 	public void setReferencePose(Pose3d referencePose) {
 		if(_photonPoseEstimator != null) {
 			_photonPoseEstimator.setReferencePose(referencePose);
 		}
 	}
 
+	// Does Photonvision have a target?
 	public boolean hasTarget() {
 		if(_camera.getLatestResult().hasTargets()) {
 			return true;
@@ -285,6 +296,7 @@ public class PhotonVision {
 		return false;
 	}
 
+	// How far is the specified target
 	public double targetDistance(int targetNumber) {
 		PhotonPipelineResult result = _camera.getLatestResult();
 		List<PhotonTrackedTarget> targets = result.getTargets();
@@ -342,6 +354,7 @@ public class PhotonVision {
 		return distance;
 	}
 
+	// Aim at the specified target
 	public double aimAtTarget(int targetNumber) {
 
 		PhotonPipelineResult result = _camera.getLatestResult();
@@ -356,6 +369,7 @@ public class PhotonVision {
 		return 0.0;
 	}
 
+	// Can photon vision see the specified target?
 	public boolean canSeeTarget(int targetNumber) {
 
 		//PhotonTrackedTarget targetToAimAt = null;
@@ -380,21 +394,14 @@ public class PhotonVision {
 		return false;
 	}
 
-	public synchronized Optional<EstimatedRobotPose> getPhotonPose(Pose2d prevEstimatedRobotPose) {
+	// This is a private method used only internally
+	private synchronized Optional<EstimatedRobotPose> getPhotonPose(Pose2d prevEstimatedRobotPose) {
 
 		if(_photonPoseEstimator != null) {
 
 			// Check if we are in simulation and the previousEstimatedRobotPose is not null
 			// and we are not connected to the camera
 			// Change this for testing
-			/*if(
-				Constants.getMode() == Mode.SIM 
-				&& prevEstimatedRobotPose != null) {
-				//&& !PhotonVisionConstants.PhysicalCamera) {
-				// Update PhotonVision based on our new robot position.
-				_visionSystemSim.update(prevEstimatedRobotPose);
-			}*/
-
 			if(prevEstimatedRobotPose != null) {
 				_photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
 				//System.out.println("PhotonVision::getPhotonPose() - x: " + prevEstimatedRobotPose.getX() + " y: " + prevEstimatedRobotPose.getY() + " rotation: " + prevEstimatedRobotPose.getRotation().getDegrees());
@@ -418,10 +425,6 @@ public class PhotonVision {
 						}
 					}
 
-					/*Logger.recordOutput(
-							"AprilTagVision/TargetsUsed",
-							allTagPoses.toArray(new Pose3d[allTagPoses.size()]));*/
-
 					Logger.recordOutput(
 							"PhotonVisionEstimator/Robot",
 							estimatedRobotPose.get().estimatedPose.toPose2d());
@@ -429,9 +432,6 @@ public class PhotonVision {
 					System.out.println(e.toString());
 				}
 			} else {
-				/*Logger.recordOutput(
-							"AprilTagVision/TargetsUsed",
-							allTagPoses.toArray(new Pose3d[allTagPoses.size()]));*/
 
 				Logger.recordOutput(
 							"PhotonVisionEstimator/Robot",

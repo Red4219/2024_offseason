@@ -178,7 +178,7 @@ public final class Constants {
 	public static class PhotonVisionConstants {
 
 		public static final boolean VisionEnabled = true;
-		public static final boolean PhysicalCamera = false;
+		//public static final boolean PhysicalCamera = false;
 
 		public static double TagHeight = Units.inchesToMeters(6.5);
 		public static double TagWidth = Units.inchesToMeters(6.5);

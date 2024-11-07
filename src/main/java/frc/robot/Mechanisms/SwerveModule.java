@@ -72,7 +72,8 @@ public class SwerveModule {
 			int absoluteEncoderPort,
 			double angleZero,
 			PIDGains angularPID,
-			PIDGains drivePID
+			PIDGains drivePID,
+			boolean invertTurningMotor
 			) {
 
 		this.moduleName = moduleName;
@@ -98,7 +99,7 @@ public class SwerveModule {
 		}
 
 		driveMotor.setInverted(true);
-		turningMotor.setInverted(false);
+		turningMotor.setInverted(invertTurningMotor);
 
 		turningMotor.restoreFactoryDefaults();
 		driveMotor.restoreFactoryDefaults();
