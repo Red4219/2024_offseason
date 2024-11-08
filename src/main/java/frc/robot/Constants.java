@@ -83,17 +83,17 @@ public final class Constants {
 		public static final int kRearRightTurningEncoderPort = 12;
 
 		// Offset angle for absolute encoders (find this using CTRE client)
-		public static final double kFrontLeftAngleZero = -13.79;
-		public static final double kFrontRightAngleZero = 90.5;
-		public static final double kRearLeftAngleZero = -171.12;
-		public static final double kRearRightAngleZero = 110.3;
+		public static final double kFrontLeftAngleZero = -81.211;
+		public static final double kFrontRightAngleZero = 33.926;
+		public static final double kRearLeftAngleZero = 125.50;
+		public static final double kRearRightAngleZero = -101.338;
 
-		public static final PIDGains kModuleDriveGains = new PIDGains(.1, 0, 0);
-		public static final PIDGains kModuleTurningGains = new PIDGains(6.5, 0.25, 0.15);
+		public static final PIDGains kModuleDriveGains = new PIDGains(0.1, 0, 0);
+		public static final PIDGains kModuleTurningGains = new PIDGains(6.5, 0.25, .15);
 	}
 
 	public static class DriveConstants {
-		//public static final double kMaxSpeedMetersPerSecond = 4.5;
+		public static final double kMaxSpeedMetersPerSecond = 16.0;
 
 		// this sets turning speed (keep this low)
 		//public static final double kMaxRPM = 10;

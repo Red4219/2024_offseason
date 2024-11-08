@@ -166,7 +166,9 @@ public class DriveSubsystem extends SubsystemBase {
 				ModuleConstants.kFrontLeftAngleZero,
 				ModuleConstants.kModuleTurningGains,
 				ModuleConstants.kModuleDriveGains,
-				false
+				true,
+				true
+
 			);
 
 		frontRight = new SwerveModule(
@@ -177,7 +179,8 @@ public class DriveSubsystem extends SubsystemBase {
 				ModuleConstants.kFrontRightAngleZero,
 				ModuleConstants.kModuleTurningGains,
 				ModuleConstants.kModuleDriveGains,
-				true
+				true,
+				false
 			);
 
 		rearLeft = new SwerveModule(
@@ -188,7 +191,8 @@ public class DriveSubsystem extends SubsystemBase {
 				ModuleConstants.kRearLeftAngleZero,
 				ModuleConstants.kModuleTurningGains,
 				ModuleConstants.kModuleDriveGains,
-				false
+				true,
+				true
 			);
 
 		rearRight = new SwerveModule(
@@ -199,7 +203,8 @@ public class DriveSubsystem extends SubsystemBase {
 				ModuleConstants.kRearRightAngleZero,
 				ModuleConstants.kModuleTurningGains,
 				ModuleConstants.kModuleDriveGains,
-				false
+				true,
+				true
 			);
 
 		swervePosition = new SwerveModulePosition[] {
@@ -365,8 +370,8 @@ public class DriveSubsystem extends SubsystemBase {
 	public void drive(double xSpeed, double ySpeed, double rot) {
 
 		// Apply deadbands to inputs
-		//xSpeed *= DriveConstants.kMaxSpeedMetersPerSecond;
-		//ySpeed *= DriveConstants.kMaxSpeedMetersPerSecond;
+		xSpeed *= DriveConstants.kMaxSpeedMetersPerSecond;
+		ySpeed *= DriveConstants.kMaxSpeedMetersPerSecond;
 
 		/*if (gyroTurning) {
 			targetRotationDegrees += rot;

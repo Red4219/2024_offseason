@@ -73,7 +73,8 @@ public class SwerveModule {
 			double angleZero,
 			PIDGains angularPID,
 			PIDGains drivePID,
-			boolean invertTurningMotor
+			boolean invertTurningMotor,
+			boolean invertDriveMotor
 			) {
 
 		this.moduleName = moduleName;
@@ -98,11 +99,14 @@ public class SwerveModule {
 			REVPhysicsSim.getInstance().addSparkMax(turningMotor, 2.6f, 5676);
 		}
 
-		driveMotor.setInverted(true);
-		turningMotor.setInverted(invertTurningMotor);
-
 		turningMotor.restoreFactoryDefaults();
 		driveMotor.restoreFactoryDefaults();
+
+		driveMotor.setInverted(invertDriveMotor);
+		turningMotor.setInverted(invertTurningMotor);
+
+		//turningMotor.restoreFactoryDefaults();
+		//driveMotor.restoreFactoryDefaults();
 
 		absoluteEncoder = new CANCoder(absoluteEncoderPort, Constants.kCanivoreCANBusName);
 		if(isSim) {
@@ -203,6 +207,7 @@ public class SwerveModule {
 
 		angularPIDOutput = m_turningPIDController.calculate(m_moduleAngleRadians,
 				optimizedState.angle.getRadians());
+		angularPIDOutput = m_turningPIDController.calculate(m_moduleAngleRadians);
 
 		angularFFOutput = turnFeedForward.calculate(m_turningPIDController.getSetpoint().velocity);
 
@@ -216,6 +221,11 @@ public class SwerveModule {
 				CANSparkMax.ControlType.kVoltage
 			);
 		} else {
+			drivePID.setReference(
+				optimizedState.speedMetersPerSecond,
+				ControlType.kVelocity
+			);
+
 			drivePID.setReference(
 				optimizedState.speedMetersPerSecond,
 				ControlType.kVelocity
