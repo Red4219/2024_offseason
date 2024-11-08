@@ -11,19 +11,7 @@ import com.ctre.phoenix.sensors.CANCoderSimCollection;
 import com.ctre.phoenix.sensors.CANCoderStatusFrame;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;*/
 
-import com.ctre.phoenix.sensors.AbsoluteSensorRange;
-import com.ctre.phoenix.sensors.SensorInitializationStrategy;
-import com.ctre.phoenix6.CANBus;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.sim.TalonFXSimState;
-
-import com.ctre.phoenix6.configs.MagnetSensorConfigs;
-import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.REVPhysicsSim;
@@ -120,12 +108,7 @@ public class SwerveModule {
 		driveMotor.setInverted(invertDriveMotor);
 		turningMotor.setInverted(invertTurningMotor);
 
-		//turningMotor.restoreFactoryDefaults();
-		//driveMotor.restoreFactoryDefaults();
-
 		//absoluteEncoder = new CANCoder(absoluteEncoderPort, Constants.kCanivoreCANBusName);
-		
-
 		absoluteEncoder = new CANcoder(absoluteEncoderPort, Constants.kCanivoreCANBusName);
 		
 		if(isSim) {
@@ -189,7 +172,7 @@ public class SwerveModule {
 		driveMotor.setSmartCurrentLimit(ModuleConstants.kDriveMotorCurrentLimit);
 
 		//m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
-		m_turningPIDController.enableContinuousInput(0, 1);
+		//m_turningPIDController.enableContinuousInput(0, 1);
 
 		//SmartDashboard.putNumber(this.moduleName + " Offset", angleZero);
 		//SmartDashboard.putString(this.moduleName + " Abs. Status", absoluteEncoder.getLastError().toString());
@@ -202,7 +185,7 @@ public class SwerveModule {
 	// Returns headings of the module
 	public double getAbsoluteHeading() {
 		//return absoluteEncoder.getAbsolutePosition();
-		return absoluteEncoder.getAbsolutePosition().refresh().getValue();
+		return (absoluteEncoder.getAbsolutePosition().refresh().getValue() * 360);
 	}
 
 	public double getDistanceMeters() {
@@ -216,14 +199,12 @@ public class SwerveModule {
 			return new SwerveModulePosition(driveEncoder.getPosition(), _simulatedAbsoluteEncoderRotation2d);
 		}
 
-		//return new SwerveModulePosition(driveEncoder.getPosition(), new Rotation2d(Math.toRadians(absoluteEncoder.getAbsolutePosition())));
-		return new SwerveModulePosition(driveEncoder.getPosition(), new Rotation2d(Math.toRadians(absoluteEncoder.getAbsolutePosition().getValue())));
+		return new SwerveModulePosition(driveEncoder.getPosition(), new Rotation2d(Math.toRadians(absoluteEncoder.getAbsolutePosition().refresh().getValue() * 360)));
 	}
 
 	public void setDesiredState(SwerveModuleState desiredState) {
 
-		//m_moduleAngleRadians = Math.toRadians(absoluteEncoder.getAbsolutePosition().getValue());
-		m_moduleAngleRadians = absoluteEncoder.getAbsolutePosition().getValue();
+		m_moduleAngleRadians = Math.toRadians(absoluteEncoder.getAbsolutePosition().refresh().getValue() * 360);
 
 		if(isSim) {
 			m_moduleAngleRadians = Math.toRadians(desiredState.angle.getDegrees());
@@ -238,7 +219,6 @@ public class SwerveModule {
 
 		angularPIDOutput = m_turningPIDController.calculate(m_moduleAngleRadians,
 				optimizedState.angle.getRadians());
-		angularPIDOutput = m_turningPIDController.calculate(m_moduleAngleRadians);
 
 		angularFFOutput = turnFeedForward.calculate(m_turningPIDController.getSetpoint().velocity);
 
@@ -252,11 +232,6 @@ public class SwerveModule {
 				CANSparkMax.ControlType.kVoltage
 			);
 		} else {
-			drivePID.setReference(
-				optimizedState.speedMetersPerSecond,
-				ControlType.kVelocity
-			);
-
 			drivePID.setReference(
 				optimizedState.speedMetersPerSecond,
 				ControlType.kVelocity
@@ -301,7 +276,6 @@ public class SwerveModule {
 	}
 
 	String getStatus() {
-		//return absoluteEncoder.getLastError().toString();
 		return absoluteEncoder.getMagnetHealth().getValue().name();
 	}
 }

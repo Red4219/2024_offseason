@@ -216,7 +216,7 @@ public class DriveSubsystem extends SubsystemBase {
 
 		odometry = new SwerveDriveOdometry(
 				DriveConstants.kDriveKinematics,
-				gyro.getRotation2d(),
+				gyro.getRotation2d().times(-1.0),
 				swervePosition);
 
 		field = new Field2d();
@@ -234,7 +234,7 @@ public class DriveSubsystem extends SubsystemBase {
 
 		poseEstimator = new SwerveDrivePoseEstimator(
 				DriveConstants.kDriveKinematics,
-				gyro.getRotation2d(),
+				gyro.getRotation2d().times(-1.0),
 				swervePosition,
 				new Pose2d(),
 				stateStdDevs,
@@ -272,6 +272,8 @@ public class DriveSubsystem extends SubsystemBase {
 			swerveTab.addBoolean("Auto Aim", this::autoAim);
 			swerveTab.addBoolean("Target Locked", this::getTargetLocked);
 		}
+
+		gyro.reset();
 	}
 
 	@Override
@@ -286,7 +288,7 @@ public class DriveSubsystem extends SubsystemBase {
 			SmartDashboard.putNumber("RR Offset Check", rearRight.getAbsoluteHeading() + rearRight.angleZero);
 			SmartDashboard.putNumber("2D X", getPose().getX());
 			SmartDashboard.putNumber("2D Y", getPose().getY());
-			SmartDashboard.putNumber("2D Gyro", odometry.getPoseMeters().getRotation().getDegrees());
+			SmartDashboard.putNumber("2D Gyro", -odometry.getPoseMeters().getRotation().getDegrees());
 		}
 
 		SmartDashboard.putData("field", field);
@@ -301,11 +303,11 @@ public class DriveSubsystem extends SubsystemBase {
 
 	// region getters
 	public double getHeading() {
-		return -gyro.getRotation2d().getDegrees();
+		return gyro.getRotation2d().times(-1.0).getDegrees();
 	}
 
 	public double getHeading360() {		
-		return (-gyro.getRotation2d().getDegrees() % 360);
+		return (gyro.getRotation2d().times(-1.0).getDegrees() % 360);
 	}
 
 	public double getRoll() {
@@ -373,19 +375,19 @@ public class DriveSubsystem extends SubsystemBase {
 		xSpeed *= DriveConstants.kMaxSpeedMetersPerSecond;
 		ySpeed *= DriveConstants.kMaxSpeedMetersPerSecond;
 
-		/*if (gyroTurning) {
+		if (gyroTurning) {
 			targetRotationDegrees += rot;
 			rot = gyroTurnPidController.calculate(getHeading360(), targetRotationDegrees);
 		} else {
 			rot *= DriveConstants.kMaxRPM;
-		}*/
+		}
 
 		this.xSpeed = xSpeed;
 		this.ySpeed = ySpeed;
 		this.rot = rot;
 
 		// If we are set to auto aim
-		if (mode == kDriveModes.AIM) {
+		/*if (mode == kDriveModes.AIM) {
 			if (Constants.kEnablePhotonVision) {
 				if (_photonVision.canSeeTarget(speakerTarget) == true) {
 
@@ -406,16 +408,16 @@ public class DriveSubsystem extends SubsystemBase {
 		} else if (mode == kDriveModes.LOCK_WHEELS) {
 			lockWheels();
 			return;
-		}
+		}*/
 
 		swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
-				ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d()));
+				ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d().times(-1.0)));
 		
 		setModuleStates(swerveModuleStates);
 	}
 
 	public ChassisSpeeds getChassisSpeedsRobotRelative() {
-		return ChassisSpeeds.fromRobotRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d());
+		return ChassisSpeeds.fromRobotRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d().times(-1.0));
 	}
 
 	public void setChassisSpeedsRobotRelative(ChassisSpeeds chassisSpeeds ) {
@@ -480,12 +482,12 @@ public class DriveSubsystem extends SubsystemBase {
 
 		} else {
 			odometry.update(
-				gyro.getRotation2d(), 
+				gyro.getRotation2d().times(-1.0), 
 				swervePosition
 			);
 
 			poseEstimator.update(
-				gyro.getRotation2d(), 
+				gyro.getRotation2d().times(-1.0), 
 				swervePosition
 			);
 		}

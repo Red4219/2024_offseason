@@ -41,6 +41,8 @@ public final class Constants {
 
 	public static class ModuleConstants {
 
+		
+
 		// Current limits for the wheels
 		public static final int kTurnMotorCurrentLimit = 25;
 		public static final int kDriveMotorCurrentLimit = 35;
@@ -93,14 +95,15 @@ public final class Constants {
 		public static final double kRearRightAngleZero = 0.0;
 
 		public static final PIDGains kModuleDriveGains = new PIDGains(0.1, 0, 0);
-		public static final PIDGains kModuleTurningGains = new PIDGains(10.5, 0.25, 1.15);
+		//public static final PIDGains kModuleTurningGains = new PIDGains(10.5, 0.25, 1.15);
+		public static final PIDGains kModuleTurningGains = new PIDGains(5.5, 0.0, 0.0);
 	}
 
 	public static class DriveConstants {
 		public static final double kMaxSpeedMetersPerSecond = 16.0;
 
 		// this sets turning speed (keep this low)
-		//public static final double kMaxRPM = 10;
+		public static final double kMaxRPM = 10;
 		public static final double kBumperToBumperWidth = Units.inchesToMeters(31);
 
 		public static final double kTrackWidth = Units.inchesToMeters(32); // in meters!
