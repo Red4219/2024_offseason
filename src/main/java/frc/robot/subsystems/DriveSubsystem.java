@@ -180,7 +180,7 @@ public class DriveSubsystem extends SubsystemBase {
 				ModuleConstants.kModuleTurningGains,
 				ModuleConstants.kModuleDriveGains,
 				true,
-				false
+				true
 			);
 
 		rearLeft = new SwerveModule(
@@ -301,11 +301,11 @@ public class DriveSubsystem extends SubsystemBase {
 
 	// region getters
 	public double getHeading() {
-		return gyro.getRotation2d().getDegrees();
+		return -gyro.getRotation2d().getDegrees();
 	}
 
 	public double getHeading360() {		
-		return (gyro.getRotation2d().getDegrees() % 360);
+		return (-gyro.getRotation2d().getDegrees() % 360);
 	}
 
 	public double getRoll() {
