@@ -62,7 +62,7 @@ public class SwerveModule {
 	private double angularFFOutput;
 	private double turnOutput;
 	private boolean isSim = false;
-
+	private ShuffleboardTab swerveTab = null;
 	
 
 	SimpleMotorFeedforward turnFeedForward = new SimpleMotorFeedforward(
@@ -173,18 +173,27 @@ public class SwerveModule {
 
 		//m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
 		//m_turningPIDController.enableContinuousInput(0, 1);
+		m_turningPIDController.enableContinuousInput(0, Math.toRadians(360));
 
-		//SmartDashboard.putNumber(this.moduleName + " Offset", angleZero);
-		//SmartDashboard.putString(this.moduleName + " Abs. Status", absoluteEncoder.getLastError().toString());
-
-		ShuffleboardTab swerveTab = Shuffleboard.getTab("Swerve");
-		swerveTab.addDouble(moduleName + " Offset", this::getAngleZero);
-		swerveTab.addString(moduleName + " Abs. Status", this::getStatus);
+		if(Constants.debugDriveTrain == true) {
+			// Swerve tab stuff
+			swerveTab = Shuffleboard.getTab("Swerve");
+			swerveTab.addDouble(moduleName + " Absolute", this::getAbsoluteHeading);
+			//swerveTab.addDouble("FR Absolute", frontRight::getAbsoluteHeading);
+			//swerveTab.addDouble("RL Absolute", rearLeft::getAbsoluteHeading);
+			//swerveTab.addDouble("RR Absolute", rearRight::getAbsoluteHeading);
+			//swerveTab.addDouble("FL Meters", frontLeft::getDistanceMeters);
+			//swerveTab.addDouble("FR Meters", frontRight::getDistanceMeters);
+			//swerveTab.addDouble("RL Meters", rearLeft::getDistanceMeters);
+			//swerveTab.addDouble("RR Meters", rearRight::getDistanceMeters);
+			
+			swerveTab.addDouble(moduleName + " Offset", this::getAngleZero);
+			swerveTab.addString(moduleName + " Abs. Status", this::getStatus);
+		}
 	}
 
 	// Returns headings of the module
 	public double getAbsoluteHeading() {
-		//return absoluteEncoder.getAbsolutePosition();
 		return (absoluteEncoder.getAbsolutePosition().refresh().getValue() * 360);
 	}
 
@@ -202,6 +211,7 @@ public class SwerveModule {
 		return new SwerveModulePosition(driveEncoder.getPosition(), new Rotation2d(Math.toRadians(absoluteEncoder.getAbsolutePosition().refresh().getValue() * 360)));
 	}
 
+	// Sets the position of the swerve module
 	public void setDesiredState(SwerveModuleState desiredState) {
 
 		m_moduleAngleRadians = Math.toRadians(absoluteEncoder.getAbsolutePosition().refresh().getValue() * 360);
@@ -215,7 +225,7 @@ public class SwerveModule {
 		// desired state
 		optimizedState = SwerveModuleState.optimize(
 				desiredState,
-				new Rotation2d(m_moduleAngleRadians));
+				Rotation2d.fromRadians(m_moduleAngleRadians));
 
 		angularPIDOutput = m_turningPIDController.calculate(m_moduleAngleRadians,
 				optimizedState.angle.getRadians());
@@ -241,11 +251,6 @@ public class SwerveModule {
 		//SmartDashboard.putNumber(this.moduleName + " Optimized Angle", optimizedState.angle.getDegrees());
 		//SmartDashboard.putNumber(this.moduleName + " PID", angularPIDOutput);
 		//SmartDashboard.putNumber(this.moduleName + " Turn Output", turnOutput);
-
-		/*Logger.getInstance().recordOutput("Motors/DriveMotorCurrentOutput_" + moduleName, driveMotor.getOutputCurrent());
-		Logger.getInstance().recordOutput("Motors/DriveMotorTemp_" + moduleName, driveMotor.getMotorTemperature());
-		Logger.getInstance().recordOutput("Motors/TurnMotorCurrentOutput_" + moduleName, turningMotor.getOutputCurrent());
-		Logger.getInstance().recordOutput("Motors/TurnMotorTemp_" + moduleName, turningMotor.getMotorTemperature());*/
 
 		Logger.recordOutput("Motors/DriveMotorCurrentOutput_" + moduleName, driveMotor.getOutputCurrent());
 		Logger.recordOutput("Motors/DriveMotorTemp_" + moduleName, driveMotor.getMotorTemperature());

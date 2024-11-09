@@ -260,7 +260,7 @@ public class DriveSubsystem extends SubsystemBase {
 			gyroTab.addDouble("Roll", gyro::getRoll);
 
 			// Swerve tab stuff
-			ShuffleboardTab swerveTab = Shuffleboard.getTab("Swerve");
+			/*ShuffleboardTab swerveTab = Shuffleboard.getTab("Swerve");
 			swerveTab.addDouble("FL Absolute", frontLeft::getAbsoluteHeading);
 			swerveTab.addDouble("FR Absolute", frontRight::getAbsoluteHeading);
 			swerveTab.addDouble("RL Absolute", rearLeft::getAbsoluteHeading);
@@ -270,7 +270,7 @@ public class DriveSubsystem extends SubsystemBase {
 			swerveTab.addDouble("RL Meters", rearLeft::getDistanceMeters);
 			swerveTab.addDouble("RR Meters", rearRight::getDistanceMeters);
 			swerveTab.addBoolean("Auto Aim", this::autoAim);
-			swerveTab.addBoolean("Target Locked", this::getTargetLocked);
+			swerveTab.addBoolean("Target Locked", this::getTargetLocked);*/
 		}
 
 		gyro.reset();
@@ -282,10 +282,10 @@ public class DriveSubsystem extends SubsystemBase {
 		updateOdometry();
 
 		if(Constants.debugDriveTrain == true) {
-			SmartDashboard.putNumber("FL Offset Check", frontLeft.getAbsoluteHeading() + frontLeft.angleZero);
-			SmartDashboard.putNumber("FR Offset Check", frontRight.getAbsoluteHeading() + frontRight.angleZero);
-			SmartDashboard.putNumber("RL Offset Check", rearLeft.getAbsoluteHeading() + rearLeft.angleZero);
-			SmartDashboard.putNumber("RR Offset Check", rearRight.getAbsoluteHeading() + rearRight.angleZero);
+			//SmartDashboard.putNumber("FL Offset Check", frontLeft.getAbsoluteHeading() + frontLeft.angleZero);
+			//SmartDashboard.putNumber("FR Offset Check", frontRight.getAbsoluteHeading() + frontRight.angleZero);
+			//SmartDashboard.putNumber("RL Offset Check", rearLeft.getAbsoluteHeading() + rearLeft.angleZero);
+			//SmartDashboard.putNumber("RR Offset Check", rearRight.getAbsoluteHeading() + rearRight.angleZero);
 			SmartDashboard.putNumber("2D X", getPose().getX());
 			SmartDashboard.putNumber("2D Y", getPose().getY());
 			SmartDashboard.putNumber("2D Gyro", -odometry.getPoseMeters().getRotation().getDegrees());
@@ -410,6 +410,7 @@ public class DriveSubsystem extends SubsystemBase {
 			return;
 		}*/
 
+		// We multiply (times) the rotation because it is inverted
 		swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
 				ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d().times(-1.0)));
 		
