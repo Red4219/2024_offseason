@@ -108,14 +108,14 @@ public class DriveSubsystem extends SubsystemBase {
 	private Trajectory.State goal = null;
 
 	// PID controller for gyro turning
-	private ProfiledPIDController gyroTurnPidController;
+	private ProfiledPIDController gyroTurnPidController = null;
 
-	private Field2d field;
+	private Field2d field = null;
 
-	private SwerveDrivePoseEstimator poseEstimator;
+	private SwerveDrivePoseEstimator poseEstimator = null;
 
-	private PhotonVision _photonVision;
-	private Pose2d photonPose2d;
+	private PhotonVision _photonVision = null;
+	private Pose2d photonPose2d = null;
 
 	private double autoX_Position = 0.0;
 	private double autoY_Position = 0.0;
@@ -291,22 +291,24 @@ public class DriveSubsystem extends SubsystemBase {
 			SmartDashboard.putNumber("2D Gyro", -odometry.getPoseMeters().getRotation().getDegrees());
 		}
 
+		Logger.recordOutput("Odometry/Robot", odometry.getPoseMeters());
+		Logger.recordOutput("Estimator/Robot", poseEstimator.getEstimatedPosition());
+
 		SmartDashboard.putData("field", field);
 	}
 
-	/*public void setAutoCommandSelected(Command autoCommand) {
-		if(autoCommand != null) {
-			_autoDetailSelected = Constants.AutonomousRoutines.get(autoCommand.getName());
-			System.out.println("auto selected: " + autoCommand.getName());
-		}
-	}*/
-
 	// region getters
 	public double getHeading() {
+		if(isSim) {
+			return gyro.getRotation2d().getDegrees();
+		}
 		return gyro.getRotation2d().times(-1.0).getDegrees();
 	}
 
-	public double getHeading360() {		
+	public double getHeading360() {
+		if(isSim) {
+			return (gyro.getRotation2d().getDegrees() % 360);
+		}
 		return (gyro.getRotation2d().times(-1.0).getDegrees() % 360);
 	}
 
@@ -344,8 +346,8 @@ public class DriveSubsystem extends SubsystemBase {
 			_photonVision.setReferencePose(pose);
 		}
 
-		Logger.recordOutput("Odometry/Robot", odometry.getPoseMeters());
-		Logger.recordOutput("Estimator/Robot", poseEstimator.getEstimatedPosition());
+		//Logger.recordOutput("Odometry/Robot", odometry.getPoseMeters());
+		//Logger.recordOutput("Estimator/Robot", poseEstimator.getEstimatedPosition());
 	}
 	
 	public void lockWheels() {
@@ -359,11 +361,11 @@ public class DriveSubsystem extends SubsystemBase {
 		setModuleStates(swerveModuleStates);
 	}
 
-	public void robotCentricDrive(double xSpeed, double ySpeed, double rot) {
+	/*public void robotCentricDrive(double xSpeed, double ySpeed, double rot) {
 		setFieldCentric(false);
 		drive(xSpeed, ySpeed, rot);
 		setFieldCentric(true);
-	}
+	}*/
 
 	/*public void drive(double xSpeed, double ySpeed, double rot) {
 		drive(xSpeed, ySpeed, rot, false, false);
@@ -372,8 +374,8 @@ public class DriveSubsystem extends SubsystemBase {
 	public void drive(double xSpeed, double ySpeed, double rot) {
 
 		// Apply deadbands to inputs
-		xSpeed *= DriveConstants.kMaxSpeedMetersPerSecond;
-		ySpeed *= DriveConstants.kMaxSpeedMetersPerSecond;
+		xSpeed *= ModuleConstants.kMaxModuleSpeedMetersPerSecond;
+		ySpeed *= ModuleConstants.kMaxModuleSpeedMetersPerSecond;
 
 		if (gyroTurning) {
 			targetRotationDegrees += rot;
@@ -411,13 +413,22 @@ public class DriveSubsystem extends SubsystemBase {
 		}*/
 
 		// We multiply (times) the rotation because it is inverted
-		swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
+		if(isSim) {
+			swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
+				ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d()));
+		} else {
+			swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
 				ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d().times(-1.0)));
+		}
 		
 		setModuleStates(swerveModuleStates);
 	}
 
 	public ChassisSpeeds getChassisSpeedsRobotRelative() {
+		if(isSim) {
+			return ChassisSpeeds.fromRobotRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d());
+		} 
+		
 		return ChassisSpeeds.fromRobotRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d().times(-1.0));
 	}
 
@@ -526,13 +537,6 @@ public class DriveSubsystem extends SubsystemBase {
 		}
 
 		field.setRobotPose(odometry.getPoseMeters());
-
-		try {
-			Logger.recordOutput("Odometry/Robot", odometry.getPoseMeters());
-			Logger.recordOutput("Estimator/Robot", poseEstimator.getEstimatedPosition());
-		} catch (Exception e) {
-			System.out.println(e.toString());
-		}
 	}
 
 	public void resetEncoders() {
@@ -603,7 +607,7 @@ public class DriveSubsystem extends SubsystemBase {
 		return trajectory.sample(trajectory.getTotalTimeSeconds());
 	}
 
-	public void goToPose(Constants.PoseDefinitions.kFieldPoses targetPose) {
+	/*public void goToPose(Constants.PoseDefinitions.kFieldPoses targetPose) {
 
 		Pose2d pose = null;
 
@@ -639,7 +643,7 @@ public class DriveSubsystem extends SubsystemBase {
 		SwerveModuleState[] moduleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(adjustedSpeeds);
 
 		setModuleStates(moduleStates);
-	}
+	}*/
 
 	public boolean getAutoPositionStatusX() {
 		return autoPositionStatusX;

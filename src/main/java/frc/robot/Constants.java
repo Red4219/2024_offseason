@@ -41,8 +41,6 @@ public final class Constants {
 
 	public static class ModuleConstants {
 
-		
-
 		// Current limits for the wheels
 		public static final int kTurnMotorCurrentLimit = 25;
 		public static final int kDriveMotorCurrentLimit = 35;
@@ -57,9 +55,9 @@ public final class Constants {
 		public static final double kwheelCircumference = Units.inchesToMeters(4) * Math.PI;
 
 		// The max speed the modules are capable of
-		public static final double kMaxModuleSpeedMetersPerSecond = Units.feetToMeters(14.5);
+		public static final double kMaxModuleSpeedMetersPerSecond = Units.feetToMeters(16.5);
 
-		public static final double ksVolts = .1;
+		//public static final double ksVolts = .1;
 		public static final double kDriveFeedForward = .2;
 
 		// TODO: Retune feedforward values for turning
@@ -85,29 +83,22 @@ public final class Constants {
 		public static final int kRearRightTurningEncoderPort = 12;
 
 		// Offset angle for absolute encoders (find this using CTRE client)
-		//public static final double kFrontLeftAngleZero = -81.211;
 		public static final double kFrontLeftAngleZero = 0.0;
-		//public static final double kFrontRightAngleZero = 33.926;
 		public static final double kFrontRightAngleZero = 0.0;
-		//public static final double kRearLeftAngleZero = 125.50;
 		public static final double kRearLeftAngleZero = 0.0;
-		//public static final double kRearRightAngleZero = -101.338;
 		public static final double kRearRightAngleZero = 0.0;
 
 		public static final PIDGains kModuleDriveGains = new PIDGains(0.1, 0, 0);
-		//public static final PIDGains kModuleTurningGains = new PIDGains(10.5, 0.25, 1.15);
 		public static final PIDGains kModuleTurningGains = new PIDGains(5.5, 0.0, 0.0);
 	}
 
 	public static class DriveConstants {
-		public static final double kMaxSpeedMetersPerSecond = 16.0;
-
 		// this sets turning speed (keep this low)
 		public static final double kMaxRPM = 10;
-		public static final double kBumperToBumperWidth = Units.inchesToMeters(31);
+		public static final double kBumperToBumperWidth = Units.inchesToMeters(32);
 
 		public static final double kTrackWidth = Units.inchesToMeters(32); // in meters!
-		public static final double kWheelBase = Units.inchesToMeters(28); // in meters!
+		public static final double kWheelBase = Units.inchesToMeters(32); // in meters!
 
 		public static final SwerveDriveKinematics kDriveKinematics = new SwerveDriveKinematics(
 				new Translation2d(kWheelBase / 2, kTrackWidth / 2), // FL
@@ -135,10 +126,10 @@ public final class Constants {
 			SOURCE
 		}
 
-		public static final Pose2d kAmplifierPoseRed = new Pose2d(14.73, 7.69, Rotation2d.fromDegrees(90.0));
+		/*public static final Pose2d kAmplifierPoseRed = new Pose2d(14.73, 7.69, Rotation2d.fromDegrees(90.0));
 		public static final Pose2d kAmplifierPoseBlue = new Pose2d(1.83, 7.78, Rotation2d.fromDegrees(90.0));
 		public static final Pose2d kSourcePoseRed = new Pose2d(0.98, 1.05, Rotation2d.fromDegrees(-120.16));
-		public static final Pose2d kSourcePoseBlue = new Pose2d(15.35, 0.88, Rotation2d.fromDegrees(-120.0));
+		public static final Pose2d kSourcePoseBlue = new Pose2d(15.35, 0.88, Rotation2d.fromDegrees(-120.0));*/
 	}
 
 	/**
@@ -155,17 +146,11 @@ public final class Constants {
 
 			public static final double kPPMaxVelocity = 4.00;
 			public static final double kPPMaxAcceleration = 2.50;
-
 			public static final double kMaxModuleSpeed = 4.5; // Max module speed, in m/s
 			public static final double kDriveBaseRadius = 0.4; // Drive base radius in meters. Distance from robot center to furthest module.
 		}
 
-		public static final PIDGains kTurnCommandGains = new PIDGains(.004, 0.0003, 0);
-		public static final double kTurnCommandToleranceDeg = 0.5;
-		public static final double kTurnCommandRateToleranceDegPerS = 0;
-
 		public static final double kAimTargetTolerance = 2.0;
-
 	}
 
 	/**
@@ -187,8 +172,8 @@ public final class Constants {
 		public static final boolean VisionEnabled = true;
 		//public static final boolean PhysicalCamera = false;
 
-		public static double TagHeight = Units.inchesToMeters(6.5);
-		public static double TagWidth = Units.inchesToMeters(6.5);
+		//public static double TagHeight = Units.inchesToMeters(6.5);
+		//public static double TagWidth = Units.inchesToMeters(6.5);
 
 		//public static final PoseStrategy poseStrategy = PoseStrategy.AVERAGE_BEST_TARGETS;
 		public static final PoseStrategy poseStrategy = PoseStrategy.CLOSEST_TO_REFERENCE_POSE;
@@ -224,11 +209,11 @@ public final class Constants {
 		public static double sim_camDiagFOV = camDiagFOV; // degrees - assume wide-angle camera
 		public static double sim_camPitch = camPitch; // degrees
     	public static double sim_camHeightOffGround = camHeightOffGround; // meters
-    	public static double sim_maxLEDRange = 20; // meters
+    	//public static double sim_maxLEDRange = 20; // meters
     	public static int sim_camResolutionWidth = 640; // pixels
     	public static int sim_camResolutionHeight = 480; // pixels
     	//public static double sim_minTargetArea = 10; // square pixels
-		public static double sim_minTargetArea = 300; // square pixels
+		//public static double sim_minTargetArea = 300; // square pixels
 
 		/**
     	* Standard deviations of the vision measurements. Increase these numbers to trust global measurements from vision
@@ -242,18 +227,4 @@ public final class Constants {
 	public static final String kRioCANBusName = "rio";
 	public static final String kCanivoreCANBusName = "canivore";
 	public static final String logFolders = "/media/sda2/";
-
-	// Autonomous section
-	public static Map<String, AutonomousDetail> AutonomousRoutines = Map.of(
-		"Test Path 1", 
-		new AutonomousDetail(
-			"Test Path 1", 
-			2.0,
-			1.09,
-			2.0,
-			8.1026 - 1.09,
-			.2,
-			.2
-		)
-	);
 }

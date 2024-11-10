@@ -70,7 +70,6 @@ public class RobotContainer {
 
 		// Add the chooser to the Shuffleboard to select which Auo to run
 		Shuffleboard.getTab("Autonomous").add("Auto", autoChooser);
-
 	}
 
 	private void configureBindings() {
@@ -88,8 +87,8 @@ public class RobotContainer {
 		driveSubsystem.setDefaultCommand(
 
 				new RunCommand(() -> driveSubsystem.drive(
-					-JoystickUtils.processJoystickInput(driverController.getLeftY()),
-					-JoystickUtils.processJoystickInput(driverController.getLeftX()),
+					JoystickUtils.processJoystickInput(driverController.getLeftY()),
+					JoystickUtils.processJoystickInput(driverController.getLeftX()),
 					JoystickUtils.processJoystickInput(driverController.getRightX())
 				),
 				driveSubsystem

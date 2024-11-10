@@ -5,12 +5,6 @@
 package frc.robot.Mechanisms;
 
 import org.littletonrobotics.junction.Logger;
-/*import com.ctre.phoenix.sensors.AbsoluteSensorRange;
-import com.ctre.phoenix.sensors.CANCoder;
-import com.ctre.phoenix.sensors.CANCoderSimCollection;
-import com.ctre.phoenix.sensors.CANCoderStatusFrame;
-import com.ctre.phoenix.sensors.SensorInitializationStrategy;*/
-
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkMax;
@@ -26,7 +20,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -39,13 +32,10 @@ public class SwerveModule {
 	/** Creates a new SwerveModule. */
 	//private final CANBus kCANBus = new CANBus();
 
-	private final  CANSparkFlex driveMotor;
-	//private final  CANSparkMax driveMotor;
+	//private final CANSparkFlex driveMotor;
+	private final  CANSparkMax driveMotor;
 	private final CANSparkMax turningMotor;
-
-	//private final CANCoder absoluteEncoder;
-	private final CANcoder absoluteEncoder;
-	//CANCoderSimCollection simCollection;
+	private final CANcoder cancoder;
 	private final RelativeEncoder driveEncoder;
 
 	private final SparkPIDController drivePID;
@@ -54,7 +44,7 @@ public class SwerveModule {
 	public final double angleZero;
 
 	private final String moduleName;
-	private Rotation2d _simulatedAbsoluteEncoderRotation2d = new Rotation2d();
+	private Rotation2d _simulatedAbsoluteEncoderRotation2d = null;
 
 	private double m_moduleAngleRadians;
 	private SwerveModuleState optimizedState;
@@ -87,14 +77,15 @@ public class SwerveModule {
 			isSim = false;
 		} else {
 			isSim = true;
+			_simulatedAbsoluteEncoderRotation2d = new Rotation2d(0.0);
 		}
 
 		// Initialize the motors
-		driveMotor = new CANSparkFlex(driveMotorChannel, MotorType.kBrushless);
-		//driveMotor = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
+		//driveMotor = new CANSparkFlex(driveMotorChannel, MotorType.kBrushless);
+		driveMotor = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
 
 		if(isSim) {
-			//REVPhysicsSim.getInstance().addSparkMax(driveMotor, 2.6f, 5676);
+			REVPhysicsSim.getInstance().addSparkMax(driveMotor, 2.6f, 5676);
 		}
 		turningMotor = new CANSparkMax(turningMotorChannel, MotorType.kBrushless);
 
@@ -107,14 +98,8 @@ public class SwerveModule {
 
 		driveMotor.setInverted(invertDriveMotor);
 		turningMotor.setInverted(invertTurningMotor);
-
-		//absoluteEncoder = new CANCoder(absoluteEncoderPort, Constants.kCanivoreCANBusName);
-		absoluteEncoder = new CANcoder(absoluteEncoderPort, Constants.kCanivoreCANBusName);
+		cancoder = new CANcoder(absoluteEncoderPort, Constants.kCanivoreCANBusName);
 		
-		if(isSim) {
-			//simCollection = absoluteEncoder.getSimCollection();
-			//simCollection = absoluteEncoder.getSimState();
-		}
 		Timer.delay(1);
 		
 		//MagnetSensorConfigs magnetSensorConfigs = 
@@ -136,7 +121,7 @@ public class SwerveModule {
 			//.withMagnetOffset(-1 * angleZero)
 		//);
 		//absoluteEncoder.getConfigurator().apply(config);
-		absoluteEncoder.clearStickyFaults();
+		cancoder.clearStickyFaults();
 
 		driveEncoder = driveMotor.getEncoder();
 		driveEncoder.setPositionConversionFactor(ModuleConstants.kdriveGearRatioL3 * ModuleConstants.kwheelCircumference); // meters
@@ -194,7 +179,7 @@ public class SwerveModule {
 
 	// Returns headings of the module
 	public double getAbsoluteHeading() {
-		return (absoluteEncoder.getAbsolutePosition().refresh().getValue() * 360);
+		return (cancoder.getAbsolutePosition().refresh().getValue() * 360);
 	}
 
 	public double getDistanceMeters() {
@@ -208,13 +193,13 @@ public class SwerveModule {
 			return new SwerveModulePosition(driveEncoder.getPosition(), _simulatedAbsoluteEncoderRotation2d);
 		}
 
-		return new SwerveModulePosition(driveEncoder.getPosition(), new Rotation2d(Math.toRadians(absoluteEncoder.getAbsolutePosition().refresh().getValue() * 360)));
+		return new SwerveModulePosition(driveEncoder.getPosition(), new Rotation2d(Math.toRadians(cancoder.getAbsolutePosition().refresh().getValue() * 360)));
 	}
 
 	// Sets the position of the swerve module
 	public void setDesiredState(SwerveModuleState desiredState) {
 
-		m_moduleAngleRadians = Math.toRadians(absoluteEncoder.getAbsolutePosition().refresh().getValue() * 360);
+		m_moduleAngleRadians = Math.toRadians(cancoder.getAbsolutePosition().refresh().getValue() * 360);
 
 		if(isSim) {
 			m_moduleAngleRadians = Math.toRadians(desiredState.angle.getDegrees());
@@ -281,6 +266,6 @@ public class SwerveModule {
 	}
 
 	String getStatus() {
-		return absoluteEncoder.getMagnetHealth().getValue().name();
+		return cancoder.getMagnetHealth().getValue().name();
 	}
 }
