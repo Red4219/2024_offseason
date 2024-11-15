@@ -32,8 +32,8 @@ public class SwerveModule {
 	/** Creates a new SwerveModule. */
 	//private final CANBus kCANBus = new CANBus();
 
-	//private final CANSparkFlex driveMotor;
-	private final  CANSparkMax driveMotor;
+	private final CANSparkFlex driveMotor;
+	//private final  CANSparkMax driveMotor;
 	private final CANSparkMax turningMotor;
 	private final CANcoder cancoder;
 	private final RelativeEncoder driveEncoder;
@@ -81,11 +81,11 @@ public class SwerveModule {
 		}
 
 		// Initialize the motors
-		//driveMotor = new CANSparkFlex(driveMotorChannel, MotorType.kBrushless);
-		driveMotor = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
+		driveMotor = new CANSparkFlex(driveMotorChannel, MotorType.kBrushless);
+		//driveMotor = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
 
 		if(isSim) {
-			REVPhysicsSim.getInstance().addSparkMax(driveMotor, 2.6f, 5676);
+			//REVPhysicsSim.getInstance().addSparkMax(driveMotor, 2.6f, 5676);
 		}
 		turningMotor = new CANSparkMax(turningMotorChannel, MotorType.kBrushless);
 
@@ -151,7 +151,7 @@ public class SwerveModule {
 		this.drivePID.setOutputRange(-1, 1);
 
 		// Configure current limits for motors
-		driveMotor.setIdleMode(IdleMode.kBrake);
+		driveMotor.setIdleMode(IdleMode.kCoast);
 		turningMotor.setIdleMode(IdleMode.kBrake);
 		turningMotor.setSmartCurrentLimit(ModuleConstants.kTurnMotorCurrentLimit);
 		driveMotor.setSmartCurrentLimit(ModuleConstants.kDriveMotorCurrentLimit);

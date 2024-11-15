@@ -167,6 +167,10 @@ public final class Constants {
 		public static final double kJoystickPow = 2.5;
 	}
 
+	public static class LimelightConstants {
+		public static String name = "limelight";
+	}
+
 	public static class PhotonVisionConstants {
 
 		public static final boolean VisionEnabled = true;

@@ -43,6 +43,7 @@ import frc.robot.Constants;
 import frc.robot.Mechanisms.SwerveModule;
 import frc.robot.Tools.AutonomousDetail;
 import frc.robot.Tools.GyroIONavX;
+import frc.robot.Tools.Limelight;
 import frc.robot.Tools.PhotonVision;
 import frc.robot.Tools.PhotonVisionResult;
 import frc.robot.Constants.DriveConstants;
@@ -115,6 +116,7 @@ public class DriveSubsystem extends SubsystemBase {
 	private SwerveDrivePoseEstimator poseEstimator = null;
 
 	private PhotonVision _photonVision = null;
+	private Limelight _limeLight = null;
 	private Pose2d photonPose2d = null;
 
 	private double autoX_Position = 0.0;
@@ -147,6 +149,10 @@ public class DriveSubsystem extends SubsystemBase {
 
 		if(Constants.kEnablePhotonVision) {
 			_photonVision = RobotContainer.photonVision;
+		}
+
+		if(Constants.kEnableLimelight) {
+			_limeLight = RobotContainer.limelight;
 		}
 
 		if(RobotBase.isReal()) {
@@ -424,14 +430,17 @@ public class DriveSubsystem extends SubsystemBase {
 		setModuleStates(swerveModuleStates);
 	}
 
+	// This is for auto
 	public ChassisSpeeds getChassisSpeedsRobotRelative() {
 		if(isSim) {
 			return ChassisSpeeds.fromRobotRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d());
 		} 
 		
-		return ChassisSpeeds.fromRobotRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d().times(-1.0));
+		//return ChassisSpeeds.fromRobotRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d().times(-1.0));
+		return ChassisSpeeds.fromRobotRelativeSpeeds(xSpeed, ySpeed, (gyro.getAngle() * -1.0), gyro.getRotation2d().times(-180.0));
 	}
 
+	// This is for auto
 	public void setChassisSpeedsRobotRelative(ChassisSpeeds chassisSpeeds ) {
 
 		chassisSpeeds = ChassisSpeeds.discretize(chassisSpeeds, 0.02);
@@ -507,7 +516,7 @@ public class DriveSubsystem extends SubsystemBase {
 		if (Constants.kEnablePhotonVision) {
 			photonVisionResult = _photonVision.getPose(poseEstimator.getEstimatedPosition());
 
-			if (photonVisionResult.targetFound()) {
+			if (photonVisionResult != null && photonVisionResult.targetFound()) {
 				photonPose2d = photonVisionResult.pose2d();
 
 				poseEstimator.addVisionMeasurement(
@@ -517,15 +526,13 @@ public class DriveSubsystem extends SubsystemBase {
 			}
 		}
 
-		if (Constants.kEnableLimelight) {
+		if (Constants.kEnableLimelight && DriverStation.getAlliance().isPresent()) {
 
-			if(DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-				limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");	
-			} else {
-				limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiRed("limelight");	
-			}
+			limelightMeasurement = _limeLight.getPoseEstimate();
 
+			// Did we get a measurement?
 			if(limelightMeasurement != null) {
+				// Make sure we can at least see 2 tags
 				if(limelightMeasurement.tagCount >= 2) {
      				//poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
      				poseEstimator.addVisionMeasurement(

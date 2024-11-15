@@ -25,9 +25,9 @@ import frc.robot.subsystems.IntakeSubsystem;
 public class RobotContainer {
 
 	public static final PhotonVision photonVision = new PhotonVision();
+	public static final Limelight limelight = new Limelight();
 	public static final DriveSubsystem driveSubsystem = new DriveSubsystem();
 	public static final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
-	public static final Limelight limelight = new Limelight();
 	//private static final CommandXboxController operatorController = new CommandXboxController(1);
 
 	

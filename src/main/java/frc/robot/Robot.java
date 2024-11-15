@@ -5,6 +5,8 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.revrobotics.REVPhysicsSim;
+
+import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,6 +28,12 @@ public class Robot extends LoggedRobot {
 
 		robotContainer = new RobotContainer();
 		DriverStation.silenceJoystickConnectionWarning(true);
+
+		if(Constants.kEnableLimelight) {
+			for (int port = 5800; port <= 5809; port++) {
+            	PortForwarder.add(port, "limelight.local", port);
+        	}
+		}
 
 		Logger.start();
 	}

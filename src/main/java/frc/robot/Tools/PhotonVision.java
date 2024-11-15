@@ -103,11 +103,11 @@ public class PhotonVision {
 				return;
 			}
 
-			// Change this for testing
-			/*if (isSim && !PhotonVisionConstants.PhysicalCamera) {
+			// If we are in a simulator, set it
+			if(isSim) {
 				System.out.println("running setupSimulation()");
 				setupSimulation(new Pose3d());
-			}*/
+			}
 
 			// If the field layout is created and valid and the camera is created and connected
 			// create the photon pose estimator.  It is where photonvision thinks the robot is.
@@ -268,7 +268,10 @@ public class PhotonVision {
 	// Get the pose/location on the field that photonvision thinks the robot is at
 	public PhotonVisionResult getPose(Pose2d prevEstimatedRobotPose) {
 		this.prevEstimatedRobotPose = prevEstimatedRobotPose;
-		
+
+		if(this._estimatedRobotPose == null) {
+			return null;
+		}		
 		return new PhotonVisionResult(true, _estimatedRobotPose.estimatedPose.toPose2d(), _estimatedRobotPose.timestampSeconds);
 	}
 
