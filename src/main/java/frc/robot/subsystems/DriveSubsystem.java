@@ -73,7 +73,7 @@ public class DriveSubsystem extends SubsystemBase {
 
 	// Initalizing the gyro sensor
 	private final AHRS gyro = new AHRS(SPI.Port.kMXP); 
-	private final GyroIONavX _gyroIONavX;
+	//private final GyroIONavX _gyroIONavX;
 	//private AutonomousDetail _autoDetailSelected = null;
 
 	private double xSpeed = 0.0;
@@ -162,7 +162,7 @@ public class DriveSubsystem extends SubsystemBase {
 		}
 		
 		gyro.reset();
-		_gyroIONavX = new GyroIONavX(gyro);
+		//_gyroIONavX = new GyroIONavX(gyro);
 
 		frontLeft = new SwerveModule(
 				"FL",
@@ -173,7 +173,7 @@ public class DriveSubsystem extends SubsystemBase {
 				ModuleConstants.kModuleTurningGains,
 				ModuleConstants.kModuleDriveGains,
 				true,
-				true
+				false
 
 			);
 
@@ -186,7 +186,7 @@ public class DriveSubsystem extends SubsystemBase {
 				ModuleConstants.kModuleTurningGains,
 				ModuleConstants.kModuleDriveGains,
 				true,
-				true
+				false
 			);
 
 		rearLeft = new SwerveModule(
@@ -198,7 +198,7 @@ public class DriveSubsystem extends SubsystemBase {
 				ModuleConstants.kModuleTurningGains,
 				ModuleConstants.kModuleDriveGains,
 				true,
-				true
+				false
 			);
 
 		rearRight = new SwerveModule(
@@ -210,7 +210,7 @@ public class DriveSubsystem extends SubsystemBase {
 				ModuleConstants.kModuleTurningGains,
 				ModuleConstants.kModuleDriveGains,
 				true,
-				true
+				false
 			);
 
 		swervePosition = new SwerveModulePosition[] {
@@ -222,7 +222,7 @@ public class DriveSubsystem extends SubsystemBase {
 
 		odometry = new SwerveDriveOdometry(
 				DriveConstants.kDriveKinematics,
-				gyro.getRotation2d().times(-1.0),
+				gyro.getRotation2d().unaryMinus(),
 				swervePosition);
 
 		field = new Field2d();
@@ -240,7 +240,7 @@ public class DriveSubsystem extends SubsystemBase {
 
 		poseEstimator = new SwerveDrivePoseEstimator(
 				DriveConstants.kDriveKinematics,
-				gyro.getRotation2d().times(-1.0),
+				gyro.getRotation2d().unaryMinus(),
 				swervePosition,
 				new Pose2d(),
 				stateStdDevs,
@@ -308,14 +308,14 @@ public class DriveSubsystem extends SubsystemBase {
 		if(isSim) {
 			return gyro.getRotation2d().getDegrees();
 		}
-		return gyro.getRotation2d().times(-1.0).getDegrees();
+		return gyro.getRotation2d().unaryMinus().getDegrees();
 	}
 
 	public double getHeading360() {
 		if(isSim) {
 			return (gyro.getRotation2d().getDegrees() % 360);
 		}
-		return (gyro.getRotation2d().times(-1.0).getDegrees() % 360);
+		return (gyro.getRotation2d().unaryMinus().getDegrees() % 360);
 	}
 
 	public double getRoll() {
@@ -424,7 +424,7 @@ public class DriveSubsystem extends SubsystemBase {
 				ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d()));
 		} else {
 			swerveModuleStates = DriveConstants.kDriveKinematics.toSwerveModuleStates(
-				ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d().times(-1.0)));
+				ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d().unaryMinus()));
 		}
 		
 		setModuleStates(swerveModuleStates);
@@ -436,8 +436,7 @@ public class DriveSubsystem extends SubsystemBase {
 			return ChassisSpeeds.fromRobotRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d());
 		} 
 		
-		//return ChassisSpeeds.fromRobotRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d().times(-1.0));
-		return ChassisSpeeds.fromRobotRelativeSpeeds(xSpeed, ySpeed, (gyro.getAngle() * -1.0), gyro.getRotation2d().times(-180.0));
+		return ChassisSpeeds.fromRobotRelativeSpeeds(xSpeed, ySpeed, rot, gyro.getRotation2d().unaryMinus());
 	}
 
 	// This is for auto
@@ -447,6 +446,7 @@ public class DriveSubsystem extends SubsystemBase {
 
 		swerveModuleStatesRobotRelative = DriveConstants.kDriveKinematics.toSwerveModuleStates(chassisSpeeds);
 
+		// In simulation, the actual navx does not work, so set the value from the chassisSpeeds
 		if(isSim) {
 			int dev = SimDeviceDataJNI.getSimDeviceHandle("navX-Sensor[0]");
 			SimDouble angle = new SimDouble(SimDeviceDataJNI.getSimValueHandle(dev, "Yaw"));
@@ -503,12 +503,12 @@ public class DriveSubsystem extends SubsystemBase {
 
 		} else {
 			odometry.update(
-				gyro.getRotation2d().times(-1.0), 
+				gyro.getRotation2d().unaryMinus(), 
 				swervePosition
 			);
 
 			poseEstimator.update(
-				gyro.getRotation2d().times(-1.0), 
+				gyro.getRotation2d().unaryMinus(), 
 				swervePosition
 			);
 		}
@@ -528,7 +528,7 @@ public class DriveSubsystem extends SubsystemBase {
 
 		if (Constants.kEnableLimelight && DriverStation.getAlliance().isPresent()) {
 
-			limelightMeasurement = _limeLight.getPoseEstimate();
+			limelightMeasurement = _limeLight.getPoseEstimate(poseEstimator.getEstimatedPosition(), gyro);
 
 			// Did we get a measurement?
 			if(limelightMeasurement != null) {

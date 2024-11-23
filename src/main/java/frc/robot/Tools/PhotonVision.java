@@ -59,6 +59,7 @@ public class PhotonVision {
 	private PhotonVisionResult photonVisionResult = new PhotonVisionResult(false, new Pose2d(), 0.0);
 	private Pose2d prevPhotonEstimatedPose = null;
 	List<Pose3d> allTagPoses = new ArrayList<>();
+	Optional<EstimatedRobotPose> estimatedRobotPose = null;
 
 	Pose3d camPose = new Pose3d();
 	private Pose2d _lastPhotonPoseEstimatorPose = new Pose2d();
@@ -234,15 +235,11 @@ public class PhotonVision {
 
 							///////////////
 
+							Thread.sleep(5);
+
 						} catch (Exception e) {
 							e.printStackTrace();
 							System.out.println(e);
-						}
-
-						try {
-							Thread.sleep(5);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
 						}
 					}
 				}
@@ -292,8 +289,13 @@ public class PhotonVision {
 
 	// Does Photonvision have a target?
 	public boolean hasTarget() {
-		if(_camera.getLatestResult().hasTargets()) {
-			return true;
+		try {
+			if(_camera.getLatestResult().hasTargets()) {
+				return true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
 		}
 
 		return false;
@@ -400,68 +402,77 @@ public class PhotonVision {
 	// This is a private method used only internally
 	private synchronized Optional<EstimatedRobotPose> getPhotonPose(Pose2d prevEstimatedRobotPose) {
 
-		if(_photonPoseEstimator != null) {
+		try {
 
-			// Check if we are in simulation and the previousEstimatedRobotPose is not null
-			// and we are not connected to the camera
-			// Change this for testing
-			if(prevEstimatedRobotPose != null) {
-				_photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
-				//System.out.println("PhotonVision::getPhotonPose() - x: " + prevEstimatedRobotPose.getX() + " y: " + prevEstimatedRobotPose.getY() + " rotation: " + prevEstimatedRobotPose.getRotation().getDegrees());
-			} else {
-				System.out.println("PhotonVision::getPhotonPose() - prevEstimatedRobotPose is null");
-				prevEstimatedRobotPose = new Pose2d();
-			}
+			if (_photonPoseEstimator != null) {
 
-			Optional<EstimatedRobotPose> estimatedRobotPose = _photonPoseEstimator.update();
+				// Check if we are in simulation and the previousEstimatedRobotPose is not null
+				// and we are not connected to the camera
+				// Change this for testing
+				if (prevEstimatedRobotPose != null) {
+					_photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
+					// System.out.println("PhotonVision::getPhotonPose() - x: " +
+					// prevEstimatedRobotPose.getX() + " y: " + prevEstimatedRobotPose.getY() + "
+					// rotation: " + prevEstimatedRobotPose.getRotation().getDegrees());
+				} else {
+					System.out.println("PhotonVision::getPhotonPose() - prevEstimatedRobotPose is null");
+					prevEstimatedRobotPose = new Pose2d();
+				}
 
-			List<Pose3d> allTagPoses = new ArrayList<>();
+				// Optional<EstimatedRobotPose> estimatedRobotPose =
+				// _photonPoseEstimator.update();
+				estimatedRobotPose = _photonPoseEstimator.update();
 
-			if (estimatedRobotPose.isPresent()) {
-				_lastPhotonPoseEstimatorPose = estimatedRobotPose.get().estimatedPose.toPose2d();
+				// List<Pose3d> allTagPoses = new ArrayList<>();
+				allTagPoses.clear();
 
-				try {
+				if (estimatedRobotPose.isPresent()) {
+					_lastPhotonPoseEstimatorPose = estimatedRobotPose.get().estimatedPose.toPose2d();
 
-					for (PhotonTrackedTarget target : estimatedRobotPose.get().targetsUsed) {
-						if (target.getFiducialId() >= 1 && target.getFiducialId() <= 8) {
-							allTagPoses.add(_aprilTagFieldLayout.getTagPose(target.getFiducialId()).get());
+					try {
+
+						for (PhotonTrackedTarget target : estimatedRobotPose.get().targetsUsed) {
+							if (target.getFiducialId() >= 1 && target.getFiducialId() <= 8) {
+								allTagPoses.add(_aprilTagFieldLayout.getTagPose(target.getFiducialId()).get());
+							}
 						}
+
+						Logger.recordOutput(
+								"PhotonVisionEstimator/Robot",
+								estimatedRobotPose.get().estimatedPose.toPose2d());
+					} catch (Exception e) {
+						System.out.println(e.toString());
 					}
+				} else {
 
 					Logger.recordOutput(
 							"PhotonVisionEstimator/Robot",
-							estimatedRobotPose.get().estimatedPose.toPose2d());
-				} catch (Exception e) {
-					System.out.println(e.toString());
-				}
-			} else {
-
-				Logger.recordOutput(
-							"PhotonVisionEstimator/Robot",
 							_lastPhotonPoseEstimatorPose);
-				
-				return Optional.empty();
-			}
 
-			return estimatedRobotPose;			
-		} else {
-			System.out.println("getPhotonPose() - _photonPoseEstimator is null");
+					return Optional.empty();
+				}
 
-			if(_camera != null) {
-				if(_camera.isConnected()) {
-					_photonPoseEstimator = new PhotonPoseEstimator(
-						_aprilTagFieldLayout, 
-						Constants.PhotonVisionConstants.poseStrategy,
-						_camera, 
-						Constants.PhotonVisionConstants.cameraToRobot
-						);
-				} else {
-					System.out.println("-------> the camera is not connected");
+				return estimatedRobotPose;
+			} else {
+				System.out.println("getPhotonPose() - _photonPoseEstimator is null");
+
+				if (_camera != null) {
+					if (_camera.isConnected()) {
+						_photonPoseEstimator = new PhotonPoseEstimator(
+								_aprilTagFieldLayout,
+								Constants.PhotonVisionConstants.poseStrategy,
+								_camera,
+								Constants.PhotonVisionConstants.cameraToRobot);
+					} else {
+						System.out.println("-------> the camera is not connected");
+					}
 				}
 			}
-		}
 
-		return Optional.empty();
+			return Optional.empty();
+		} catch (Exception e) {
+			return Optional.empty();
+		}
 	}
 
 	// setup the tags and set the origin to how to show the tags
