@@ -1,86 +1,62 @@
-package frc.robot.Tools;
+package frc.robot.subsystems;
 
 import org.littletonrobotics.junction.Logger;
 
 import com.kauailabs.navx.frc.AHRS;
 
-import edu.wpi.first.hal.SimBoolean;
-import edu.wpi.first.hal.SimDevice;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.interfaces.Gyro;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.LimelightHelpers.RawDetection;
 import frc.robot.LimelightHelpers.RawFiducial;
 
-public class Limelight {
+public class LimelightSubsystem extends SubsystemBase {
+
     private PoseEstimate limelightMeasurement = null;
     private boolean isSim = false;
-	private String name = "";
 	private RawDetection[] rawDetections;
 	private RawFiducial[] rawFiducials;
 	private int[] detections;
 	private int counter = 0;
-	//private boolean isRed = false;
-	//private boolean colorSet = false;
-	//private boolean rejectUpdate = false;
 	private LimelightHelpers.PoseEstimate mt2;
 
-    public Limelight() {
-		/*if(DriverStation.getAlliance().isPresent()) {
-			if(DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-				isRed = false;
-			} else {
-				isRed = true;	
-			}
-		}*/
-	}
+    private AHRS gyro = null;
+    private Pose2d previouPose2d = null;
 
-	/*public void setIsRed(boolean isRed) {
-		this.isRed = isRed;
-	}*/
+    public LimelightSubsystem() {
+    }
 
-    public PoseEstimate getPoseEstimate(Pose2d pose, AHRS gyro) {
-        if (Constants.kEnableLimelight) {
+    public void setPreviousPoseEstimate(Pose2d pose) {
+        previouPose2d = pose;
+    }
 
-			
+    public  PoseEstimate getPoseEstimate() {
+        return this.limelightMeasurement;
+    }
 
-			/*if(colorSet == false) {
-				if(DriverStation.getAlliance().isPresent()) {
-					if(DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-						isRed = false;
-					} else {
-						isRed = true;	
-					}
-				}
-			}
+    public void setGyro(AHRS gyro) {
+        this.gyro = gyro;
+    }
 
-			if(isRed) {
-				limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(Constants.LimelightConstants.name);	
-			} else {
-				limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiRed(Constants.LimelightConstants.name);	
-			}
+    @Override
+    public void simulationPeriodic() {
+        
+    }
 
-			// Check for null and handle it if necessary
-			if(limelightMeasurement == null) {
-				return null;
-			}
+    @Override
+	public void periodic() {
+        if (Constants.kEnableLimelight && gyro != null && previouPose2d != null) {
+            limelightMeasurement = _getPoseEstimate(previouPose2d, gyro);
 
-			// Get the list of tags being detected to be logged
-			counter = 0;
-			detections = new int[limelightMeasurement.tagCount];
-			for (RawFiducial rawFiducial : limelightMeasurement.rawFiducials) {
-				detections[counter] = rawFiducial.id;
-				counter++;
-			}
-
-			Logger.recordOutput("Limelight/Pose", limelightMeasurement.pose);
+            Logger.recordOutput("Limelight/Pose", limelightMeasurement.pose);
 			Logger.recordOutput("Limelight/Tags", detections);
+        }
+    }
 
-            return limelightMeasurement;*/
+    private PoseEstimate _getPoseEstimate(Pose2d pose, AHRS gyro) {
+        if (Constants.kEnableLimelight) {
 
 			LimelightHelpers.SetRobotOrientation(
 				"limelight",
@@ -107,14 +83,6 @@ public class Limelight {
         		//rejectUpdate = true;
 				return null;
       		}
-      		/*if(!rejectUpdate) {
-        		m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
-        		m_poseEstimator.addVisionMeasurement(
-            	mt2.pose,
-            	mt2.timestampSeconds
-			);*/
-
-			Logger.recordOutput("Limelight/Pose", mt2.pose);
 
 			return mt2;
 		}

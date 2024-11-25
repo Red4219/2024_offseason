@@ -5,6 +5,7 @@ import java.util.OptionalLong;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -21,13 +22,16 @@ import frc.robot.commands.Autonomous.IntakeCommand;
 import frc.robot.commands.Autonomous.LockWheelsCommand;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.LimelightSubsystem;
 
 public class RobotContainer {
 
+	public static final Field2d field = new Field2d();
 	public static final PhotonVision photonVision = new PhotonVision();
 	public static final Limelight limelight = new Limelight();
 	public static final DriveSubsystem driveSubsystem = new DriveSubsystem();
 	public static final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+	//public static final LimelightSubsystem limelightSubsystem = new LimelightSubsystem();
 	//private static final CommandXboxController operatorController = new CommandXboxController(1);
 
 	
@@ -70,6 +74,10 @@ public class RobotContainer {
 
 		// Add the chooser to the Shuffleboard to select which Auo to run
 		Shuffleboard.getTab("Autonomous").add("Auto", autoChooser);
+
+		/*if(Constants.kEnableLimelight) {
+			limelightSubsystem.setGyro(driveSubsystem.getGyro());
+		}*/
 	}
 
 	private void configureBindings() {

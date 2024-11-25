@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import java.util.ArrayList;
 import org.littletonrobotics.junction.Logger;
+import org.photonvision.EstimatedRobotPose;
 
 import edu.wpi.first.hal.SimDevice;
 import edu.wpi.first.hal.SimDouble;
@@ -45,7 +46,6 @@ import frc.robot.Tools.AutonomousDetail;
 import frc.robot.Tools.GyroIONavX;
 import frc.robot.Tools.Limelight;
 import frc.robot.Tools.PhotonVision;
-import frc.robot.Tools.PhotonVisionResult;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ModuleConstants;
 import frc.robot.LimelightHelpers;
@@ -73,8 +73,6 @@ public class DriveSubsystem extends SubsystemBase {
 
 	// Initalizing the gyro sensor
 	private final AHRS gyro = new AHRS(SPI.Port.kMXP); 
-	//private final GyroIONavX _gyroIONavX;
-	//private AutonomousDetail _autoDetailSelected = null;
 
 	private double xSpeed = 0.0;
 	private double ySpeed = 0.0;
@@ -84,7 +82,6 @@ public class DriveSubsystem extends SubsystemBase {
 	private int speakerTarget = 0;
 	private boolean targetLocked = false;
 	private boolean isSim = false;
-	private PhotonVisionResult photonVisionResult = null;
 	private LimelightHelpers.PoseEstimate limelightMeasurement = null;
 
 	// Odeometry class for tracking robot pose
@@ -111,8 +108,6 @@ public class DriveSubsystem extends SubsystemBase {
 	// PID controller for gyro turning
 	private ProfiledPIDController gyroTurnPidController = null;
 
-	private Field2d field = null;
-
 	private SwerveDrivePoseEstimator poseEstimator = null;
 
 	private PhotonVision _photonVision = null;
@@ -125,6 +120,7 @@ public class DriveSubsystem extends SubsystemBase {
 	private boolean autoPositionStatusY = false;
 
 	private SwerveModuleState[] swerveModuleStatesRobotRelative;
+	private EstimatedRobotPose phoneEstimatedRobotPose;
 
 	/**
 	* Standard deviations of model states. Increase these numbers to trust your model's state estimates less. This
@@ -141,6 +137,10 @@ public class DriveSubsystem extends SubsystemBase {
 		Constants.PhotonVisionConstants.visionMeasurementStdDevsY, 
 		Constants.PhotonVisionConstants.visionMeasurementStdDevsTheta
 	);
+
+	public AHRS getGyro() {
+		return this.gyro;
+	}
 
 	//private NetworkTableInstance networkTableInstance = NetworkTableInstance.getDefault();
 
@@ -225,8 +225,6 @@ public class DriveSubsystem extends SubsystemBase {
 				gyro.getRotation2d().unaryMinus(),
 				swervePosition);
 
-		field = new Field2d();
-
 		gyroTurnPidController = new ProfiledPIDController(
 				DriveConstants.kGyroTurningGains.kP,
 				DriveConstants.kGyroTurningGains.kI,
@@ -300,7 +298,7 @@ public class DriveSubsystem extends SubsystemBase {
 		Logger.recordOutput("Odometry/Robot", odometry.getPoseMeters());
 		Logger.recordOutput("Estimator/Robot", poseEstimator.getEstimatedPosition());
 
-		SmartDashboard.putData("field", field);
+		SmartDashboard.putData("field", RobotContainer.field);
 	}
 
 	// region getters
@@ -337,13 +335,13 @@ public class DriveSubsystem extends SubsystemBase {
 	public void resetOdometry(Pose2d pose) {
 
 		odometry.resetPosition(
-			(isSim) ? pose.getRotation() : gyro.getRotation2d(),
+			gyro.getRotation2d(),
 			swervePosition,
 			pose
 		);
 
 		poseEstimator.resetPosition(
-			(isSim) ? pose.getRotation() : gyro.getRotation2d(),
+			gyro.getRotation2d(),
 			swervePosition,
 			pose
 		);
@@ -514,15 +512,15 @@ public class DriveSubsystem extends SubsystemBase {
 		}
 
 		if (Constants.kEnablePhotonVision) {
-			photonVisionResult = _photonVision.getPose(poseEstimator.getEstimatedPosition());
 
-			if (photonVisionResult != null && photonVisionResult.targetFound()) {
-				photonPose2d = photonVisionResult.pose2d();
+			phoneEstimatedRobotPose = _photonVision.getPose(poseEstimator.getEstimatedPosition());
 
+			if(phoneEstimatedRobotPose != null) {
 				poseEstimator.addVisionMeasurement(
-						photonPose2d,
-						Timer.getFPGATimestamp() - photonVisionResult.imageCaptureTime(),
-						visionMeasurementStdDevs);
+					phoneEstimatedRobotPose.estimatedPose.toPose2d(),
+					Timer.getFPGATimestamp() - phoneEstimatedRobotPose.timestampSeconds,
+					visionMeasurementStdDevs
+				);
 			}
 		}
 
@@ -543,7 +541,7 @@ public class DriveSubsystem extends SubsystemBase {
 			}
 		}
 
-		field.setRobotPose(odometry.getPoseMeters());
+		RobotContainer.field.setRobotPose(odometry.getPoseMeters());
 	}
 
 	public void resetEncoders() {

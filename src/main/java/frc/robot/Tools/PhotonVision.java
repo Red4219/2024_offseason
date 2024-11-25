@@ -31,6 +31,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.PhotonVisionConstants;
 import edu.wpi.first.cscore.VideoMode;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -39,7 +40,6 @@ import edu.wpi.first.wpilibj.RobotBase;
 
 public class PhotonVision {
 	private PhotonCamera _camera;
-	//private PhotonCamera _camera = null;
 	
 	// simulation variables
 	//private SimVisionSystem _simVisionSystem;
@@ -56,13 +56,12 @@ public class PhotonVision {
 	PhotonPipelineResult result;
 	List<PhotonTrackedTarget> targets;
 	private Pose2d prevEstimatedRobotPose = null;
-	private PhotonVisionResult photonVisionResult = new PhotonVisionResult(false, new Pose2d(), 0.0);
 	private Pose2d prevPhotonEstimatedPose = null;
 	List<Pose3d> allTagPoses = new ArrayList<>();
 	Optional<EstimatedRobotPose> estimatedRobotPose = null;
 
 	Pose3d camPose = new Pose3d();
-	private Pose2d _lastPhotonPoseEstimatorPose = new Pose2d();
+	private Pose3d _lastPhotonPoseEstimatorPose = new Pose3d();
 
 	private boolean isSim = false;
 	
@@ -136,7 +135,6 @@ public class PhotonVision {
 				photonVisionTab.addBoolean("Connection", this::isConnected);
 				photonVisionTab.addBoolean("Has Target", this::hasTarget);
 				photonVisionTab.addString("Targets Used", this::targetsUsed);
-				// photonVisionTab.addDouble("Target Used", this::getTargetUsed);
 				photonVisionTab.addDouble("Speaker ID", this::getSpeakerTarget);
 			}
 
@@ -146,20 +144,17 @@ public class PhotonVision {
 
 					while (true) {
 
-						if (isSim) {
-							// Update PhotonVision based on our new robot position.
-							//_simVisionSystem.processFrame(prevEstimatedRobotPose);
-
-							if (prevEstimatedRobotPose == null) {
-								prevEstimatedRobotPose = new Pose2d();
-							}
-
-							_visionSystemSim.update(prevEstimatedRobotPose);
-						}
-
 						if (prevEstimatedRobotPose == null) {
 							System.out.println("PhonVision::getPose() - prevEstimatedRobotPose is null");
 							prevEstimatedRobotPose = new Pose2d();
+						}
+
+						if (isSim) {
+							// Update PhotonVision based on our new robot position.
+							_visionSystemSim.update(prevEstimatedRobotPose);
+
+							//vision.getSimDebugField()
+							
 						}
 
 						try {
@@ -191,10 +186,6 @@ public class PhotonVision {
 
 							if (o.isPresent()) {
 
-								// System.out.println("PhonVision::getPose() - it is present");
-
-								// estimatedRobotPose = o.get();
-								// _estimatedRobotPose = estimatedRobotPose;
 								_estimatedRobotPose = o.get();
 
 								for (PhotonTrackedTarget target : _estimatedRobotPose.targetsUsed) {
@@ -202,27 +193,9 @@ public class PhotonVision {
 											_aprilTagFieldLayout.getTagPose(target.getFiducialId()).get());
 								}
 
-								/*
-								 * Logger.recordOutput(
-								 * "AprilTagVision/TagPoses",
-								 * allTagPoses.toArray(new Pose3d[allTagPoses.size()]));
-								 */
-
-								// return new PhotonVisionResult(true, estimatedRobotPose.estimatedPose,
-								// estimatedRobotPose.timestampSeconds);
-
-								prevPhotonEstimatedPose = _estimatedRobotPose.estimatedPose.toPose2d();
-
-								photonVisionResult
-										.setTargetFound(true)
-										.setImageCaptureTime(_estimatedRobotPose.timestampSeconds)
-										.setPose2d(prevPhotonEstimatedPose);
-
-								// photonVisionResult = new PhotonVisionResult(true,
-								// _estimatedRobotPose.estimatedPose,
-								// _estimatedRobotPose.timestampSeconds);
-
-								Logger.recordOutput("PhotonVisionEstimator/Robot", prevPhotonEstimatedPose);
+								if(Constants.debugPhotonVision) {
+									RobotContainer.field.getObject("PhotonEstimatedRobot").setPose(_estimatedRobotPose.estimatedPose.toPose2d());
+								}
 
 							} else {
 								// System.out.println("PhonVision::getPose() - I don't see any tags");
@@ -263,13 +236,14 @@ public class PhotonVision {
 	}
 
 	// Get the pose/location on the field that photonvision thinks the robot is at
-	public PhotonVisionResult getPose(Pose2d prevEstimatedRobotPose) {
+	public EstimatedRobotPose getPose(Pose2d prevEstimatedRobotPose) {
 		this.prevEstimatedRobotPose = prevEstimatedRobotPose;
 
 		if(this._estimatedRobotPose == null) {
 			return null;
 		}		
-		return new PhotonVisionResult(true, _estimatedRobotPose.estimatedPose.toPose2d(), _estimatedRobotPose.timestampSeconds);
+
+		return _estimatedRobotPose;
 	}
 
 	// Set the reference 2D (X,Y) pose/position for PhotonVision to use
@@ -288,14 +262,19 @@ public class PhotonVision {
 	}
 
 	// Does Photonvision have a target?
-	public boolean hasTarget() {
-		try {
+	public boolean hasTarget() {		
+
+		/*try {
 			if(_camera.getLatestResult().hasTargets()) {
 				return true;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("PhotonVision::hasTarget() - " + e.getMessage());
 			return false;
+		}*/
+
+		if(!_estimatedRobotPose.targetsUsed.isEmpty()) {
+			return true;
 		}
 
 		return false;
@@ -303,25 +282,33 @@ public class PhotonVision {
 
 	// How far is the specified target
 	public double targetDistance(int targetNumber) {
-		PhotonPipelineResult result = _camera.getLatestResult();
-		List<PhotonTrackedTarget> targets = result.getTargets();
 
-		for(PhotonTrackedTarget target: targets) {
-			if(target.getFiducialId() == targetNumber) {
+		/*try {
+			PhotonPipelineResult result = _camera.getLatestResult();
+			List<PhotonTrackedTarget> targets = result.getTargets();
 
-				double range =
-                        PhotonUtils.calculateDistanceToTargetMeters(
-                                Constants.PhotonVisionConstants.camHeightOffGround,
-                                _aprilTagFieldLayout.getTagPose(targetNumber).get().getZ(),
-								//Constants.PhotonVisionConstants.TagHeight,
-                                Constants.PhotonVisionConstants.camPitch,
-                                Units.degreesToRadians(result.getBestTarget().getPitch()));
+			for (PhotonTrackedTarget target : targets) {
+				if (target.getFiducialId() == targetNumber) {
 
-				return range;
+					double range = PhotonUtils.calculateDistanceToTargetMeters(
+							Constants.PhotonVisionConstants.camHeightOffGround,
+							_aprilTagFieldLayout.getTagPose(targetNumber).get().getZ(),
+							// Constants.PhotonVisionConstants.TagHeight,
+							Constants.PhotonVisionConstants.camPitch,
+							Units.degreesToRadians(result.getBestTarget().getPitch()));
+
+					return range;
+				}
 			}
+		} catch (Exception e) {
+			System.out.println("PhotonVision::targetDistance() - " + e.getMessage());
+			return 0.0;
 		}
 
-		return 0.0;
+		return 0.0;*/
+
+		//return PhotonUtils.getDistanceToPose(_estimatedRobotPose, );
+		return PhotonUtils.getDistanceToPose(_estimatedRobotPose.estimatedPose.toPose2d(), _aprilTagFieldLayout.getTagPose(targetNumber).get().toPose2d());
 	}
 
 	public double getTargetDistance() {
@@ -411,23 +398,17 @@ public class PhotonVision {
 				// Change this for testing
 				if (prevEstimatedRobotPose != null) {
 					_photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
-					// System.out.println("PhotonVision::getPhotonPose() - x: " +
-					// prevEstimatedRobotPose.getX() + " y: " + prevEstimatedRobotPose.getY() + "
-					// rotation: " + prevEstimatedRobotPose.getRotation().getDegrees());
 				} else {
 					System.out.println("PhotonVision::getPhotonPose() - prevEstimatedRobotPose is null");
 					prevEstimatedRobotPose = new Pose2d();
 				}
 
-				// Optional<EstimatedRobotPose> estimatedRobotPose =
-				// _photonPoseEstimator.update();
 				estimatedRobotPose = _photonPoseEstimator.update();
 
-				// List<Pose3d> allTagPoses = new ArrayList<>();
 				allTagPoses.clear();
 
 				if (estimatedRobotPose.isPresent()) {
-					_lastPhotonPoseEstimatorPose = estimatedRobotPose.get().estimatedPose.toPose2d();
+					_lastPhotonPoseEstimatorPose = estimatedRobotPose.get().estimatedPose;
 
 					try {
 
@@ -439,7 +420,7 @@ public class PhotonVision {
 
 						Logger.recordOutput(
 								"PhotonVisionEstimator/Robot",
-								estimatedRobotPose.get().estimatedPose.toPose2d());
+								estimatedRobotPose.get().estimatedPose);
 					} catch (Exception e) {
 						System.out.println(e.toString());
 					}
@@ -554,7 +535,9 @@ public class PhotonVision {
 	private void setupSimulation(Pose3d aprilTagFieldLayoutOrigin) {
 
 		_visionSystemSim = new VisionSystemSim("main");
-		_visionSystemSim.addCamera(new PhotonCameraSim(_camera), Constants.PhotonVisionConstants.cameraToRobot);
+		PhotonCameraSim cameraSim = new PhotonCameraSim(_camera);
+		cameraSim.enableDrawWireframe(true);
+		_visionSystemSim.addCamera(cameraSim, Constants.PhotonVisionConstants.cameraToRobot);
 			
 		
 		// See
