@@ -72,7 +72,7 @@ public class DriveSubsystem extends SubsystemBase {
 	private SwerveModuleState[] swerveModuleStates;
 
 	// Initalizing the gyro sensor
-	private final AHRS gyro = new AHRS(SPI.Port.kMXP); 
+	private final AHRS gyro = new AHRS(SPI.Port.kMXP);
 
 	private double xSpeed = 0.0;
 	private double ySpeed = 0.0;
@@ -142,7 +142,7 @@ public class DriveSubsystem extends SubsystemBase {
 		return this.gyro;
 	}
 
-	//private NetworkTableInstance networkTableInstance = NetworkTableInstance.getDefault();
+	private NetworkTableInstance networkTableInstance = NetworkTableInstance.getDefault();
 
 	/** Creates a new DriveSubsystem. */
 	public DriveSubsystem() {
@@ -293,6 +293,27 @@ public class DriveSubsystem extends SubsystemBase {
 			SmartDashboard.putNumber("2D X", getPose().getX());
 			SmartDashboard.putNumber("2D Y", getPose().getY());
 			SmartDashboard.putNumber("2D Gyro", -odometry.getPoseMeters().getRotation().getDegrees());
+
+			// read the PIDs from Network tables
+			frontLeft.setTurningPID(
+				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_P).getDouble(0.0),
+				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_I).getDouble(0.0),
+				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_D).getDouble(0.0));
+
+			frontRight.setTurningPID(
+				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_P).getDouble(0.0),
+				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_I).getDouble(0.0),
+				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_D).getDouble(0.0));
+
+			rearLeft.setTurningPID(
+				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_P).getDouble(0.0),
+				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_I).getDouble(0.0),
+				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_D).getDouble(0.0));
+
+			rearRight.setTurningPID(
+				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_P).getDouble(0.0),
+				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_I).getDouble(0.0),
+				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_D).getDouble(0.0));
 		}
 
 		Logger.recordOutput("Odometry/Robot", odometry.getPoseMeters());
@@ -524,23 +545,29 @@ public class DriveSubsystem extends SubsystemBase {
 			}
 		}
 
-		if (Constants.kEnableLimelight && DriverStation.getAlliance().isPresent()) {
+		if (Constants.kEnableLimelight) {
 
-			limelightMeasurement = _limeLight.getPoseEstimate(poseEstimator.getEstimatedPosition(), gyro);
+			_limeLight.setPose(odometry.getPoseMeters());
+
+			//limelightMeasurement = _limeLight.getPoseEstimate(poseEstimator.getEstimatedPosition(), gyro);
+			limelightMeasurement = _limeLight.getPoseEstimate();
 
 			// Did we get a measurement?
 			if(limelightMeasurement != null) {
 				// Make sure we can at least see 2 tags
 				if(limelightMeasurement.tagCount >= 2) {
-     				//poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+     				poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
      				poseEstimator.addVisionMeasurement(
          				limelightMeasurement.pose,
          				limelightMeasurement.timestampSeconds
 					);
    				}
+
+				Logger.recordOutput("Limelight/Pose", limelightMeasurement.pose);
 			}
 		}
 
+		// Update the field with the location of the robot
 		RobotContainer.field.setRobotPose(odometry.getPoseMeters());
 	}
 

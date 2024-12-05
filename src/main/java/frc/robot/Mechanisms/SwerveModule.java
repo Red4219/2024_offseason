@@ -20,6 +20,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -53,6 +54,7 @@ public class SwerveModule {
 	private double turnOutput;
 	private boolean isSim = false;
 	private ShuffleboardTab swerveTab = null;
+	private NetworkTableInstance networkTableInstance = NetworkTableInstance.getDefault();
 	
 
 	SimpleMotorFeedforward turnFeedForward = new SimpleMotorFeedforward(
@@ -102,25 +104,7 @@ public class SwerveModule {
 		
 		Timer.delay(1);
 		
-		//MagnetSensorConfigs magnetSensorConfigs = 
-		//new MagnetSensorConfigs().withMagnetOffset(-1 * angleZero).withAbsoluteSensorRange(AbsoluteSensorRangeValue.Signed_PlusMinusHalf);
-
-		//absoluteEncoder.getConfigurator().apply(new CANcoderConfiguration().withMagnetSensor(magnetSensorConfigs));
-
-		/*absoluteEncoder.configFactoryDefault();
-		absoluteEncoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
-		absoluteEncoder.configAbsoluteSensorRange(AbsoluteSensorRange.Signed_PlusMinus180);
-		absoluteEncoder.configMagnetOffset(-1 * angleZero);
-		absoluteEncoder.setStatusFramePeriod(CANCoderStatusFrame.SensorData, 10, 100);
-		absoluteEncoder.clearStickyFaults();*/
-
-		//CANcoderConfiguration config = new CANcoderConfiguration();
-		//config.MagnetSensor.AbsoluteSensorRange.Signed_PlusMinusHalf
-		//config = config.withMagnetSensor(
-			//config.MagnetSensor.withAbsoluteSensorRange(AbsoluteSensorRangeValue.Unsigned_0To1)
-			//.withMagnetOffset(-1 * angleZero)
-		//);
-		//absoluteEncoder.getConfigurator().apply(config);
+		
 		cancoder.clearStickyFaults();
 
 		driveEncoder = driveMotor.getEncoder();
@@ -175,6 +159,10 @@ public class SwerveModule {
 			swerveTab.addDouble(moduleName + " Offset", this::getAngleZero);
 			swerveTab.addString(moduleName + " Abs. Status", this::getStatus);
 		}
+
+		networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_P).setDouble(angularPID.kP);
+		networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_I).setDouble(angularPID.kI);
+		networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_D).setDouble(angularPID.kD);
 	}
 
 	// Returns headings of the module
@@ -267,5 +255,9 @@ public class SwerveModule {
 
 	String getStatus() {
 		return cancoder.getMagnetHealth().getValue().name();
+	}
+
+	public void setTurningPID(double p, double i, double d) {
+		m_turningPIDController.setPID(p, i, d);
 	}
 }

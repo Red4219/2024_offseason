@@ -37,7 +37,7 @@ public final class Constants {
 	public static boolean debugPhotonVision = false;
 	public static boolean kEnablePhotonVision = false;
 	public static boolean kEnableLimelight = true;
-	public static boolean kDebugLimelight = false;
+	public static boolean kDebugLimelight = true;
 
 	public static class ModuleConstants {
 
@@ -90,6 +90,10 @@ public final class Constants {
 
 		public static final PIDGains kModuleDriveGains = new PIDGains(0.1, 0, 0);
 		public static final PIDGains kModuleTurningGains = new PIDGains(5.5, 0.0, 0.0);
+
+		public static final String kTurningPID_P = "/drive/turning/p";
+		public static final String kTurningPID_I = "/drive/turning/i";
+		public static final String kTurningPID_D = "/drive/turning/d";
 	}
 
 	public static class DriveConstants {

@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.interfaces.Gyro;
 import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
+import frc.robot.RobotContainer;
 import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.LimelightHelpers.RawDetection;
 import frc.robot.LimelightHelpers.RawFiducial;
@@ -28,99 +29,117 @@ public class Limelight {
 	//private boolean colorSet = false;
 	//private boolean rejectUpdate = false;
 	private LimelightHelpers.PoseEstimate mt2;
+	private Pose2d robotPose2d = null;
 
     public Limelight() {
-		/*if(DriverStation.getAlliance().isPresent()) {
-			if(DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-				isRed = false;
-			} else {
-				isRed = true;	
-			}
-		}*/
-	}
+		if (Constants.kEnableLimelight) {
+			robotPose2d = new Pose2d();
+			Thread thread = new Thread() {
+				public void run() {
 
-	/*public void setIsRed(boolean isRed) {
-		this.isRed = isRed;
-	}*/
+					while (true) {
+							LimelightHelpers.SetRobotOrientation(
+									"limelight",
+									robotPose2d.getRotation().getDegrees(),
+									0,
+									0,
+									0,
+									0,
+									0);
 
-    public PoseEstimate getPoseEstimate(Pose2d pose, AHRS gyro) {
-        if (Constants.kEnableLimelight) {
+							//mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+							mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+							
 
-			
+							if (mt2 != null) {
 
-			/*if(colorSet == false) {
-				if(DriverStation.getAlliance().isPresent()) {
-					if(DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-						isRed = false;
-					} else {
-						isRed = true;	
+								/*
+								 * if(mt2 == null) {
+								 * return null;
+								 * }
+								 */
+
+								/*if (Math.abs(gyro.getRate()) > 720) // if our angular velocity is greater than 720
+																	// degrees
+																	// per
+																	// second, ignore vision updates
+								{
+									// rejectUpdate = true;
+									// return null;
+								}
+								if (mt2.tagCount == 0) {
+									// rejectUpdate = true;
+									// return null;
+								}*/
+								/*
+								 * if(!rejectUpdate) {
+								 * m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+								 * m_poseEstimator.addVisionMeasurement(
+								 * mt2.pose,
+								 * mt2.timestampSeconds
+								 * );
+								 */
+
+								//Logger.recordOutput("Limelight/Pose", mt2.pose);
+							} 
 					}
 				}
-			}
+			};
 
-			if(isRed) {
-				limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(Constants.LimelightConstants.name);	
-			} else {
-				limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiRed(Constants.LimelightConstants.name);	
-			}
-
-			// Check for null and handle it if necessary
-			if(limelightMeasurement == null) {
-				return null;
-			}
-
-			// Get the list of tags being detected to be logged
-			counter = 0;
-			detections = new int[limelightMeasurement.tagCount];
-			for (RawFiducial rawFiducial : limelightMeasurement.rawFiducials) {
-				detections[counter] = rawFiducial.id;
-				counter++;
-			}
-
-			Logger.recordOutput("Limelight/Pose", limelightMeasurement.pose);
-			Logger.recordOutput("Limelight/Tags", detections);
-
-            return limelightMeasurement;*/
-
-			LimelightHelpers.SetRobotOrientation(
-				"limelight",
-				pose.getRotation().getDegrees(),
-				0,
-				0,
-				0,
-				0,
-				0
-			);
-
-      		mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
-
-			if(mt2 == null) {
-				return null;
-			}
-
-      		if(Math.abs(gyro.getRate()) > 720) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
-      		{
-        		//rejectUpdate = true;
-				return null;
-      		}
-      		if(mt2.tagCount == 0) {
-        		//rejectUpdate = true;
-				return null;
-      		}
-      		/*if(!rejectUpdate) {
-        		m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
-        		m_poseEstimator.addVisionMeasurement(
-            	mt2.pose,
-            	mt2.timestampSeconds
-			);*/
-
-			Logger.recordOutput("Limelight/Pose", mt2.pose);
-
-			return mt2;
+			thread.start();
 		}
+	}
 
-        return null;
-    }
+	public synchronized void setPose(Pose2d pose2d) {
+		robotPose2d = pose2d;
+	}
+
+	public PoseEstimate getPoseEstimate() {
+		return mt2;
+	}
+
+    // public PoseEstimate getPoseEstimate(Pose2d pose, AHRS gyro) {
+    //     if (Constants.kEnableLimelight) {
+
+	// 		LimelightHelpers.SetRobotOrientation(
+	// 			"limelight",
+	// 			pose.getRotation().getDegrees(),
+	// 			0,
+	// 			0,
+	// 			0,
+	// 			0,
+	// 			0
+	// 		);
+
+    //   		mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+
+	// 		if(mt2 == null) {
+	// 			return null;
+	// 		}
+
+    //   		if(Math.abs(gyro.getRate()) > 720) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
+    //   		{
+    //     		//rejectUpdate = true;
+	// 			return null;
+    //   		}
+    //   		if(mt2.tagCount == 0) {
+    //     		//rejectUpdate = true;
+	// 			return null;
+    //   		}
+    //   		/*if(!rejectUpdate) {
+    //     		m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+    //     		m_poseEstimator.addVisionMeasurement(
+    //         	mt2.pose,
+    //         	mt2.timestampSeconds
+	// 		);*/
+
+	// 		Logger.recordOutput("Limelight/Pose", mt2.pose);
+
+	// 		return mt2;
+	// 	}
+
+    //     return null;
+    // }
 
 	public Pose2d getPose2d() {
 		return LimelightHelpers.getBotPose2d(Constants.LimelightConstants.name);
