@@ -60,6 +60,8 @@ public class PhotonVision {
 	List<Pose3d> allTagPoses = new ArrayList<>();
 	Optional<EstimatedRobotPose> estimatedRobotPose = null;
 
+	private double[] poseArray = new double[3];
+
 	Pose3d camPose = new Pose3d();
 	private Pose3d _lastPhotonPoseEstimatorPose = new Pose3d();
 
@@ -197,6 +199,15 @@ public class PhotonVision {
 									RobotContainer.field.getObject("PhotonEstimatedRobot").setPose(_estimatedRobotPose.estimatedPose.toPose2d());
 								}
 
+								poseArray[0] = estimatedRobotPose.get().estimatedPose.getX();
+								poseArray[1] = estimatedRobotPose.get().estimatedPose.getY();
+								poseArray[2] = estimatedRobotPose.get().estimatedPose.getRotation().getAngle();
+						
+								Logger.recordOutput(
+									"PhotonVisionEstimator/position",
+									poseArray
+								);
+
 							} else {
 								// System.out.println("PhonVision::getPose() - I don't see any tags");
 								// Since we do not have any tags that we can see, blank out the list
@@ -205,6 +216,20 @@ public class PhotonVision {
 										"AprilTagVision/TagPoses",
 										allTagPoses.toArray(new Pose3d[allTagPoses.size()]));
 							}
+
+							Logger.recordOutput(
+								"PhotonVisionEstimator/Robot",
+								_lastPhotonPoseEstimatorPose
+							);
+
+							poseArray[0] = _lastPhotonPoseEstimatorPose.getX();
+							poseArray[1] = _lastPhotonPoseEstimatorPose.getY();
+							poseArray[2] = _lastPhotonPoseEstimatorPose.getRotation().getAngle();
+						
+							Logger.recordOutput(
+								"PhotonVisionEstimator/position",
+								poseArray
+							);
 
 							///////////////
 
@@ -421,6 +446,15 @@ public class PhotonVision {
 						Logger.recordOutput(
 								"PhotonVisionEstimator/Robot",
 								estimatedRobotPose.get().estimatedPose);
+
+						poseArray[0] = estimatedRobotPose.get().estimatedPose.getX();
+						poseArray[1] = estimatedRobotPose.get().estimatedPose.getY();
+						poseArray[2] = estimatedRobotPose.get().estimatedPose.getRotation().getAngle();
+						
+						Logger.recordOutput(
+							"PhotonVisionEstimator/position",
+							poseArray
+						);
 					} catch (Exception e) {
 						System.out.println(e.toString());
 					}
@@ -429,6 +463,15 @@ public class PhotonVision {
 					Logger.recordOutput(
 							"PhotonVisionEstimator/Robot",
 							_lastPhotonPoseEstimatorPose);
+
+					poseArray[0] = estimatedRobotPose.get().estimatedPose.getX();
+					poseArray[1] = estimatedRobotPose.get().estimatedPose.getY();
+					poseArray[2] = estimatedRobotPose.get().estimatedPose.getRotation().getAngle();
+						
+					Logger.recordOutput(
+						"PhotonVisionEstimator/position",
+						poseArray
+					);
 
 					return Optional.empty();
 				}

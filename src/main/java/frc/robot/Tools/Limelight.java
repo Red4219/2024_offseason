@@ -25,11 +25,10 @@ public class Limelight {
 	private RawFiducial[] rawFiducials;
 	private int[] detections;
 	private int counter = 0;
-	//private boolean isRed = false;
-	//private boolean colorSet = false;
 	//private boolean rejectUpdate = false;
 	private LimelightHelpers.PoseEstimate mt2;
 	private Pose2d robotPose2d = null;
+	private double[] poseArray = new double[3];
 
     public Limelight() {
 		if (Constants.kEnableLimelight) {
@@ -52,6 +51,17 @@ public class Limelight {
 							
 
 							if (mt2 != null) {
+
+								poseArray[0] = mt2.pose.getX();
+								poseArray[1] = mt2.pose.getY();
+								poseArray[2] = mt2.pose.getRotation().getDegrees();
+
+								Logger.recordOutput(
+									"Limelight/position",
+									poseArray
+								);
+
+								//Logger.recordOutput("Limelight/Pose", mt2.pose);
 
 								/*
 								 * if(mt2 == null) {
@@ -98,51 +108,9 @@ public class Limelight {
 		return mt2;
 	}
 
-    // public PoseEstimate getPoseEstimate(Pose2d pose, AHRS gyro) {
-    //     if (Constants.kEnableLimelight) {
-
-	// 		LimelightHelpers.SetRobotOrientation(
-	// 			"limelight",
-	// 			pose.getRotation().getDegrees(),
-	// 			0,
-	// 			0,
-	// 			0,
-	// 			0,
-	// 			0
-	// 		);
-
-    //   		mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
-
-	// 		if(mt2 == null) {
-	// 			return null;
-	// 		}
-
-    //   		if(Math.abs(gyro.getRate()) > 720) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
-    //   		{
-    //     		//rejectUpdate = true;
-	// 			return null;
-    //   		}
-    //   		if(mt2.tagCount == 0) {
-    //     		//rejectUpdate = true;
-	// 			return null;
-    //   		}
-    //   		/*if(!rejectUpdate) {
-    //     		m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
-    //     		m_poseEstimator.addVisionMeasurement(
-    //         	mt2.pose,
-    //         	mt2.timestampSeconds
-	// 		);*/
-
-	// 		Logger.recordOutput("Limelight/Pose", mt2.pose);
-
-	// 		return mt2;
-	// 	}
-
-    //     return null;
-    // }
-
 	public Pose2d getPose2d() {
-		return LimelightHelpers.getBotPose2d(Constants.LimelightConstants.name);
+		//return LimelightHelpers.getBotPose2d(Constants.LimelightConstants.name);
+		return mt2.pose;
 	}
 
 	public boolean hasTarget() {

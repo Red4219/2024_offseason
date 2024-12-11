@@ -94,6 +94,10 @@ public final class Constants {
 		public static final String kTurningPID_P = "/drive/turning/p";
 		public static final String kTurningPID_I = "/drive/turning/i";
 		public static final String kTurningPID_D = "/drive/turning/d";
+
+		public static final String kDrivePID_P = "/drive/drive/p";
+		public static final String kDrivePID_I = "/drive/drive/i";
+		public static final String kDrivePID_D = "/drive/drive/d";
 	}
 
 	public static class DriveConstants {

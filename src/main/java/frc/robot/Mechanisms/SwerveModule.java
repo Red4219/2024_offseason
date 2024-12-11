@@ -4,6 +4,8 @@
 
 package frc.robot.Mechanisms;
 
+import java.util.EnumSet;
+
 import org.littletonrobotics.junction.Logger;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.CANSparkFlex;
@@ -20,6 +22,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.networktables.NetworkTableEvent;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -163,6 +166,60 @@ public class SwerveModule {
 		networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_P).setDouble(angularPID.kP);
 		networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_I).setDouble(angularPID.kI);
 		networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_D).setDouble(angularPID.kD);
+
+		networkTableInstance.getEntry(Constants.ModuleConstants.kDrivePID_P).setDouble(drivePID.kP);
+		networkTableInstance.getEntry(Constants.ModuleConstants.kDrivePID_I).setDouble(drivePID.kI);
+		networkTableInstance.getEntry(Constants.ModuleConstants.kDrivePID_D).setDouble(drivePID.kD);
+
+		// Setup listeners to listen for changes to the values
+
+		networkTableInstance.addListener(
+			networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_P),
+			EnumSet.of(NetworkTableEvent.Kind.kValueAll),
+			event -> {
+				m_turningPIDController.setP(event.valueData.value.getDouble());
+			}
+		);
+
+		networkTableInstance.addListener(
+			networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_I),
+			EnumSet.of(NetworkTableEvent.Kind.kValueAll),
+			event -> {
+				m_turningPIDController.setI(event.valueData.value.getDouble());
+			}
+		);
+
+		networkTableInstance.addListener(
+			networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_D),
+			EnumSet.of(NetworkTableEvent.Kind.kValueAll),
+			event -> {
+				m_turningPIDController.setD(event.valueData.value.getDouble());
+			}
+		);
+
+		networkTableInstance.addListener(
+			networkTableInstance.getEntry(Constants.ModuleConstants.kDrivePID_P),
+			EnumSet.of(NetworkTableEvent.Kind.kValueAll),
+			event -> {
+				this.drivePID.setP(event.valueData.value.getDouble());
+			}
+		);
+
+		networkTableInstance.addListener(
+			networkTableInstance.getEntry(Constants.ModuleConstants.kDrivePID_I),
+			EnumSet.of(NetworkTableEvent.Kind.kValueAll),
+			event -> {
+				this.drivePID.setI(event.valueData.value.getDouble());
+			}
+		);
+
+		networkTableInstance.addListener(
+			networkTableInstance.getEntry(Constants.ModuleConstants.kDrivePID_D),
+			EnumSet.of(NetworkTableEvent.Kind.kValueAll),
+			event -> {
+				this.drivePID.setD(event.valueData.value.getDouble());
+			}
+		);
 	}
 
 	// Returns headings of the module
@@ -259,5 +316,11 @@ public class SwerveModule {
 
 	public void setTurningPID(double p, double i, double d) {
 		m_turningPIDController.setPID(p, i, d);
+	}
+
+	public void setDrivePID(double p, double i, double d) {
+		drivePID.setP(p);
+		drivePID.setI(i);
+		drivePID.setD(d);
 	}
 }

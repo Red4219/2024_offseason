@@ -293,27 +293,6 @@ public class DriveSubsystem extends SubsystemBase {
 			SmartDashboard.putNumber("2D X", getPose().getX());
 			SmartDashboard.putNumber("2D Y", getPose().getY());
 			SmartDashboard.putNumber("2D Gyro", -odometry.getPoseMeters().getRotation().getDegrees());
-
-			// read the PIDs from Network tables
-			frontLeft.setTurningPID(
-				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_P).getDouble(0.0),
-				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_I).getDouble(0.0),
-				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_D).getDouble(0.0));
-
-			frontRight.setTurningPID(
-				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_P).getDouble(0.0),
-				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_I).getDouble(0.0),
-				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_D).getDouble(0.0));
-
-			rearLeft.setTurningPID(
-				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_P).getDouble(0.0),
-				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_I).getDouble(0.0),
-				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_D).getDouble(0.0));
-
-			rearRight.setTurningPID(
-				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_P).getDouble(0.0),
-				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_I).getDouble(0.0),
-				networkTableInstance.getEntry(Constants.ModuleConstants.kTurningPID_D).getDouble(0.0));
 		}
 
 		Logger.recordOutput("Odometry/Robot", odometry.getPoseMeters());
@@ -555,16 +534,19 @@ public class DriveSubsystem extends SubsystemBase {
 			// Did we get a measurement?
 			if(limelightMeasurement != null) {
 				// Make sure we can at least see 2 tags
-				if(limelightMeasurement.tagCount >= 2) {
+				//if(limelightMeasurement.tagCount >= 2) {
      				poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
      				poseEstimator.addVisionMeasurement(
          				limelightMeasurement.pose,
          				limelightMeasurement.timestampSeconds
 					);
-   				}
+   				//}
 
-				Logger.recordOutput("Limelight/Pose", limelightMeasurement.pose);
+				Logger.recordOutput("Limelight/Pose", limelightMeasurement.pose);	
 			}
+
+			//Logger.recordOutput("Limelight/Pose", limelightMeasurement.pose);
+			//Logger.recordOutput("Limelight/Pose", _limeLight.getPose2d());
 		}
 
 		// Update the field with the location of the robot
