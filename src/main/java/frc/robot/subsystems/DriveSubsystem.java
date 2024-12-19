@@ -521,9 +521,11 @@ public class DriveSubsystem extends SubsystemBase {
 
 		if (Constants.kEnableLimelight) {
 
-			_limeLight.setPose(odometry.getPoseMeters());
+			/*_limeLight.setPose(odometry.getPoseMeters());
 
-			limelightMeasurement = _limeLight.getPoseEstimate();
+			limelightMeasurement = _limeLight.getPoseEstimate();*/
+
+			limelightMeasurement = _limeLight.getPose2d(odometry.getPoseMeters());
 
 			// Did we get a measurement?
 			if(limelightMeasurement != null  && limelightMeasurement.tagCount >= 1) {
@@ -543,9 +545,6 @@ public class DriveSubsystem extends SubsystemBase {
 					resetOdometry(limelightMeasurement.pose);
 				}
 			}
-
-			//Logger.recordOutput("Limelight/Pose", limelightMeasurement.pose);
-			//Logger.recordOutput("Limelight/Pose", _limeLight.getPose2d());
 		}
 
 		if(isSim) {

@@ -31,7 +31,7 @@ public class Limelight {
 	private double[] poseArray = new double[3];
 
     public Limelight() {
-		if (Constants.kEnableLimelight) {
+		/*if (Constants.kEnableLimelight) {
 			robotPose2d = new Pose2d();
 			Thread thread = new Thread() {
 				public void run() {
@@ -50,56 +50,19 @@ public class Limelight {
 							mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
 
 							if (mt2 != null) {
-
 								poseArray[0] = mt2.pose.getX();
 								poseArray[1] = mt2.pose.getY();
 								poseArray[2] = mt2.pose.getRotation().getDegrees();
-
-								/*Logger.recordOutput(
-									"Limelight/position",
-									poseArray
-								);*/
-
-								//Logger.recordOutput("Limelight/Pose", mt2.pose);
-
-								/*
-								 * if(mt2 == null) {
-								 * return null;
-								 * }
-								 */
-
-								/*if (Math.abs(gyro.getRate()) > 720) // if our angular velocity is greater than 720
-																	// degrees
-																	// per
-																	// second, ignore vision updates
-								{
-									// rejectUpdate = true;
-									// return null;
-								}
-								if (mt2.tagCount == 0) {
-									// rejectUpdate = true;
-									// return null;
-								}*/
-								/*
-								 * if(!rejectUpdate) {
-								 * m_poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
-								 * m_poseEstimator.addVisionMeasurement(
-								 * mt2.pose,
-								 * mt2.timestampSeconds
-								 * );
-								 */
-
-								//Logger.recordOutput("Limelight/Pose", mt2.pose);
 							}
 					}
 				}
 			};
 
 			thread.start();
-		}
+		}*/
 	}
 
-	public synchronized void setPose(Pose2d pose2d) {
+	/*public synchronized void setPose(Pose2d pose2d) {
 		robotPose2d = pose2d;
 	}
 
@@ -110,6 +73,28 @@ public class Limelight {
 	public Pose2d getPose2d() {
 		//return LimelightHelpers.getBotPose2d(Constants.LimelightConstants.name);
 		return mt2.pose;
+	}*/
+
+	public PoseEstimate getPose2d(Pose2d robotPose2d) {
+
+		LimelightHelpers.SetRobotOrientation(
+									"limelight",
+									robotPose2d.getRotation().getDegrees(),
+									0,
+									0,
+									0,
+									0,
+									0);
+
+		mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+
+							if (mt2 != null) {
+								poseArray[0] = mt2.pose.getX();
+								poseArray[1] = mt2.pose.getY();
+								poseArray[2] = mt2.pose.getRotation().getDegrees();
+							}
+
+		return mt2;
 	}
 
 	public double[] getPoseArray() {
