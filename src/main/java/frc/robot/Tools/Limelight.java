@@ -31,6 +31,7 @@ public class Limelight {
 	private double[] poseArray = new double[3];
 
     public Limelight() {
+		LimelightHelpers.setCameraPose_RobotSpace("limelight", 0, 0, 0, 0, 0, 180);
 		/*if (Constants.kEnableLimelight) {
 			robotPose2d = new Pose2d();
 			Thread thread = new Thread() {

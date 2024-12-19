@@ -525,7 +525,8 @@ public class DriveSubsystem extends SubsystemBase {
 
 			limelightMeasurement = _limeLight.getPoseEstimate();*/
 
-			limelightMeasurement = _limeLight.getPose2d(odometry.getPoseMeters());
+			//limelightMeasurement = _limeLight.getPose2d(odometry.getPoseMeters());
+			limelightMeasurement = _limeLight.getPose2d(poseEstimator.getEstimatedPosition());
 
 			// Did we get a measurement?
 			if(limelightMeasurement != null  && limelightMeasurement.tagCount >= 1) {
