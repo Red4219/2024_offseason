@@ -25,11 +25,11 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.Constants.PhotonVisionConstants;
@@ -49,7 +49,7 @@ public class PhotonVision {
 	private double _sim_targetHeight;
 	private AprilTagFieldLayout _aprilTagFieldLayout;
 	private PhotonPoseEstimator _photonPoseEstimator;
-	ShuffleboardTab photonVisionTab;
+	private ShuffleboardTab photonVisionTab;
 	private EstimatedRobotPose _estimatedRobotPose;
 	private int[] _targetsUsed = new int[0];
 	private int _speakerTarget = 0;
@@ -60,10 +60,11 @@ public class PhotonVision {
 	List<Pose3d> allTagPoses = new ArrayList<>();
 	Optional<EstimatedRobotPose> estimatedRobotPose = null;
 
-	private double[] poseArray = new double[3];
+	//private double[] poseArray = new double[3];
 
 	Pose3d camPose = new Pose3d();
 	private Pose3d _lastPhotonPoseEstimatorPose = new Pose3d();
+	private NetworkTableInstance networkTableInstance = NetworkTableInstance.getDefault();
 
 	private boolean isSim = false;
 	
@@ -199,14 +200,16 @@ public class PhotonVision {
 									RobotContainer.field.getObject("PhotonEstimatedRobot").setPose(_estimatedRobotPose.estimatedPose.toPose2d());
 								}
 
-								poseArray[0] = estimatedRobotPose.get().estimatedPose.getX();
-								poseArray[1] = estimatedRobotPose.get().estimatedPose.getY();
-								poseArray[2] = estimatedRobotPose.get().estimatedPose.getRotation().getAngle();
+								/*poseArray[0] = _estimatedRobotPose.estimatedPose.getX();
+								poseArray[1] = _estimatedRobotPose.estimatedPose.getY();
+								poseArray[2] = _estimatedRobotPose.estimatedPose.getRotation().getAngle();*/
 						
-								Logger.recordOutput(
+								/*Logger.recordOutput(
 									"PhotonVisionEstimator/position",
 									poseArray
-								);
+								);*/
+
+								//networkTableInstance.getEntry("/photonvision/PhotonVisionEstimator/position").setDoubleArray(poseArray);
 
 							} else {
 								// System.out.println("PhonVision::getPose() - I don't see any tags");
@@ -217,19 +220,20 @@ public class PhotonVision {
 										allTagPoses.toArray(new Pose3d[allTagPoses.size()]));
 							}
 
-							Logger.recordOutput(
+							/*Logger.recordOutput(
 								"PhotonVisionEstimator/Robot",
 								_lastPhotonPoseEstimatorPose
-							);
+							);*/
 
-							poseArray[0] = _lastPhotonPoseEstimatorPose.getX();
+							/*poseArray[0] = _lastPhotonPoseEstimatorPose.getX();
 							poseArray[1] = _lastPhotonPoseEstimatorPose.getY();
-							poseArray[2] = _lastPhotonPoseEstimatorPose.getRotation().getAngle();
+							poseArray[2] = _lastPhotonPoseEstimatorPose.getRotation().getAngle();*/
 						
-							Logger.recordOutput(
+							/*Logger.recordOutput(
 								"PhotonVisionEstimator/position",
 								poseArray
-							);
+							);*/
+							//networkTableInstance.getEntry("/photonvision/PhotonVisionEstimator/position").setDoubleArray(poseArray);
 
 							///////////////
 
@@ -443,18 +447,20 @@ public class PhotonVision {
 							}
 						}
 
+						// use _lastPhotonPoseEstimatorPose since we assigned it earlier
 						Logger.recordOutput(
 								"PhotonVisionEstimator/Robot",
-								estimatedRobotPose.get().estimatedPose);
+								_lastPhotonPoseEstimatorPose);
 
-						poseArray[0] = estimatedRobotPose.get().estimatedPose.getX();
-						poseArray[1] = estimatedRobotPose.get().estimatedPose.getY();
-						poseArray[2] = estimatedRobotPose.get().estimatedPose.getRotation().getAngle();
+						// use _lastPhotonPoseEstimatorPose since we assigned it earlier
+						/*poseArray[0] = _lastPhotonPoseEstimatorPose.getX();
+						poseArray[1] = _lastPhotonPoseEstimatorPose.getY();
+						poseArray[2] = _lastPhotonPoseEstimatorPose.getRotation().getAngle();
 						
 						Logger.recordOutput(
 							"PhotonVisionEstimator/position",
 							poseArray
-						);
+						);*/
 					} catch (Exception e) {
 						System.out.println(e.toString());
 					}
@@ -464,14 +470,14 @@ public class PhotonVision {
 							"PhotonVisionEstimator/Robot",
 							_lastPhotonPoseEstimatorPose);
 
-					poseArray[0] = estimatedRobotPose.get().estimatedPose.getX();
-					poseArray[1] = estimatedRobotPose.get().estimatedPose.getY();
-					poseArray[2] = estimatedRobotPose.get().estimatedPose.getRotation().getAngle();
+					/*poseArray[0] = _lastPhotonPoseEstimatorPose.getX();
+					poseArray[1] = _lastPhotonPoseEstimatorPose.getY();
+					poseArray[2] = _lastPhotonPoseEstimatorPose.getRotation().getAngle();
 						
 					Logger.recordOutput(
 						"PhotonVisionEstimator/position",
 						poseArray
-					);
+					);*/
 
 					return Optional.empty();
 				}

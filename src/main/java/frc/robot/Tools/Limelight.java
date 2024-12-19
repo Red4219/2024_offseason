@@ -56,10 +56,10 @@ public class Limelight {
 								poseArray[1] = mt2.pose.getY();
 								poseArray[2] = mt2.pose.getRotation().getDegrees();
 
-								Logger.recordOutput(
+								/*Logger.recordOutput(
 									"Limelight/position",
 									poseArray
-								);
+								);*/
 
 								//Logger.recordOutput("Limelight/Pose", mt2.pose);
 
@@ -111,6 +111,10 @@ public class Limelight {
 	public Pose2d getPose2d() {
 		//return LimelightHelpers.getBotPose2d(Constants.LimelightConstants.name);
 		return mt2.pose;
+	}
+
+	public double[] getPoseArray() {
+		return poseArray;
 	}
 
 	public boolean hasTarget() {

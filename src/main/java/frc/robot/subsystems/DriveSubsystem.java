@@ -57,6 +57,7 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.RobotBase;
 
+
 public class DriveSubsystem extends SubsystemBase {
 
 	private boolean fieldRelative = true;
@@ -86,6 +87,10 @@ public class DriveSubsystem extends SubsystemBase {
 
 	// Odeometry class for tracking robot pose
 	private SwerveDriveOdometry odometry;
+
+	private Pose2d estimatedPose;
+	private double[] combinedEstimatedPoseArray = new double[9];
+
 
 	// test for auto positioning
 	private HolonomicDriveController holonomicDriveController = new HolonomicDriveController(
@@ -293,12 +298,19 @@ public class DriveSubsystem extends SubsystemBase {
 			SmartDashboard.putNumber("2D X", getPose().getX());
 			SmartDashboard.putNumber("2D Y", getPose().getY());
 			SmartDashboard.putNumber("2D Gyro", -odometry.getPoseMeters().getRotation().getDegrees());
+			SmartDashboard.putData("field", RobotContainer.field);
 		}
 
 		Logger.recordOutput("Odometry/Robot", odometry.getPoseMeters());
-		Logger.recordOutput("Estimator/Robot", poseEstimator.getEstimatedPosition());
 
-		SmartDashboard.putData("field", RobotContainer.field);
+		// Show the estimated position
+		estimatedPose = poseEstimator.getEstimatedPosition();
+		Logger.recordOutput("Estimator/Robot", estimatedPose);
+
+		combinedEstimatedPoseArray[0] = estimatedPose.getX();
+		combinedEstimatedPoseArray[1] = estimatedPose.getY();
+		combinedEstimatedPoseArray[2] = estimatedPose.getRotation().getDegrees();
+		Logger.recordOutput("Estimator/PoseArray", combinedEstimatedPoseArray);
 	}
 
 	// region getters
@@ -522,6 +534,11 @@ public class DriveSubsystem extends SubsystemBase {
 					visionMeasurementStdDevs
 				);
 			}
+
+			// update the combined
+			combinedEstimatedPoseArray[6] = phoneEstimatedRobotPose.estimatedPose.getX();
+			combinedEstimatedPoseArray[7] = phoneEstimatedRobotPose.estimatedPose.getY();
+			combinedEstimatedPoseArray[8] = phoneEstimatedRobotPose.estimatedPose.getRotation().toRotation2d().getDegrees();
 		}
 
 		if (Constants.kEnableLimelight) {
@@ -542,7 +559,12 @@ public class DriveSubsystem extends SubsystemBase {
 					);
    				//}
 
-				Logger.recordOutput("Limelight/Pose", limelightMeasurement.pose);	
+				Logger.recordOutput("Limelight/Pose", limelightMeasurement.pose);
+				//Logger.recordOutput("Limelight/position", _limeLight.getPoseArray());
+
+				combinedEstimatedPoseArray[3] = limelightMeasurement.pose.getX();
+				combinedEstimatedPoseArray[4] = limelightMeasurement.pose.getY();
+				combinedEstimatedPoseArray[5] = limelightMeasurement.pose.getRotation().getDegrees();
 			}
 
 			//Logger.recordOutput("Limelight/Pose", limelightMeasurement.pose);
