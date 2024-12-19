@@ -48,7 +48,6 @@ public class Limelight {
 
 							//mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
 							mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
-							
 
 							if (mt2 != null) {
 
@@ -91,7 +90,7 @@ public class Limelight {
 								 */
 
 								//Logger.recordOutput("Limelight/Pose", mt2.pose);
-							} 
+							}
 					}
 				}
 			};

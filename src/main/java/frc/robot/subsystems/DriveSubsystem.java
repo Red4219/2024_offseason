@@ -283,6 +283,8 @@ public class DriveSubsystem extends SubsystemBase {
 		}
 
 		gyro.reset();
+
+		poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
 	}
 
 	@Override
@@ -301,11 +303,11 @@ public class DriveSubsystem extends SubsystemBase {
 			SmartDashboard.putData("field", RobotContainer.field);
 		}
 
-		Logger.recordOutput("Odometry/Robot", odometry.getPoseMeters());
+		//Logger.recordOutput("Odometry/Robot", odometry.getPoseMeters());
 
 		// Show the estimated position
-		estimatedPose = poseEstimator.getEstimatedPosition();
-		Logger.recordOutput("Estimator/Robot", estimatedPose);
+		//estimatedPose = poseEstimator.getEstimatedPosition();
+		//Logger.recordOutput("Estimator/Robot", poseEstimator.getEstimatedPosition());
 
 		combinedEstimatedPoseArray[0] = estimatedPose.getX();
 		combinedEstimatedPoseArray[1] = estimatedPose.getY();
@@ -499,30 +501,6 @@ public class DriveSubsystem extends SubsystemBase {
 		swervePosition[2] = rearLeft.getPosition();
 		swervePosition[3] = rearRight.getPosition();
 
-		// For some reason, the code below is preventing rotation in SIM
-		if(isSim) {
-
-			odometry.update(
-				Rotation2d.fromDegrees(getHeading()),
-				swervePosition);
-
-			poseEstimator.update(
-				Rotation2d.fromDegrees(getHeading()),
-				swervePosition
-			);
-
-		} else {
-			odometry.update(
-				gyro.getRotation2d().unaryMinus(), 
-				swervePosition
-			);
-
-			poseEstimator.update(
-				gyro.getRotation2d().unaryMinus(), 
-				swervePosition
-			);
-		}
-
 		if (Constants.kEnablePhotonVision) {
 
 			phoneEstimatedRobotPose = _photonVision.getPose(poseEstimator.getEstimatedPosition());
@@ -545,19 +523,14 @@ public class DriveSubsystem extends SubsystemBase {
 
 			_limeLight.setPose(odometry.getPoseMeters());
 
-			//limelightMeasurement = _limeLight.getPoseEstimate(poseEstimator.getEstimatedPosition(), gyro);
 			limelightMeasurement = _limeLight.getPoseEstimate();
 
 			// Did we get a measurement?
-			if(limelightMeasurement != null) {
-				// Make sure we can at least see 2 tags
-				//if(limelightMeasurement.tagCount >= 2) {
-     				poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
-     				poseEstimator.addVisionMeasurement(
-         				limelightMeasurement.pose,
-         				limelightMeasurement.timestampSeconds
-					);
-   				//}
+			if(limelightMeasurement != null  && limelightMeasurement.tagCount >= 1) {
+     			poseEstimator.addVisionMeasurement(
+         			limelightMeasurement.pose,
+         			limelightMeasurement.timestampSeconds
+				);
 
 				Logger.recordOutput("Limelight/Pose", limelightMeasurement.pose);
 				//Logger.recordOutput("Limelight/position", _limeLight.getPoseArray());
@@ -565,11 +538,43 @@ public class DriveSubsystem extends SubsystemBase {
 				combinedEstimatedPoseArray[3] = limelightMeasurement.pose.getX();
 				combinedEstimatedPoseArray[4] = limelightMeasurement.pose.getY();
 				combinedEstimatedPoseArray[5] = limelightMeasurement.pose.getRotation().getDegrees();
+
+				if(!gyro.isMoving() && limelightMeasurement.tagCount >= 1) {
+					resetOdometry(limelightMeasurement.pose);
+				}
 			}
 
 			//Logger.recordOutput("Limelight/Pose", limelightMeasurement.pose);
 			//Logger.recordOutput("Limelight/Pose", _limeLight.getPose2d());
 		}
+
+		if(isSim) {
+
+			odometry.update(
+				Rotation2d.fromDegrees(getHeading()),
+				swervePosition);
+
+			poseEstimator.update(
+				Rotation2d.fromDegrees(getHeading()),
+				swervePosition
+			);
+
+		} else {
+			odometry.update(
+				gyro.getRotation2d().unaryMinus(),
+				swervePosition
+			);
+
+			estimatedPose = poseEstimator.update(
+				gyro.getRotation2d().unaryMinus(),
+				swervePosition
+			);
+		}
+
+		// Show the estimated position
+		Logger.recordOutput("Estimator/Robot", estimatedPose);
+
+		Logger.recordOutput("Odometry/Robot", odometry.getPoseMeters());
 
 		// Update the field with the location of the robot
 		RobotContainer.field.setRobotPose(odometry.getPoseMeters());
