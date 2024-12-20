@@ -221,6 +221,8 @@ public class PhotonVision {
 								Logger.recordOutput(
 										"AprilTagVision/TagPoses",
 										allTagPoses.toArray(new Pose3d[allTagPoses.size()]));
+
+								_estimatedRobotPose = null;
 							}
 
 							/*Logger.recordOutput(
@@ -271,9 +273,9 @@ public class PhotonVision {
 	public EstimatedRobotPose getPose(Pose2d prevEstimatedRobotPose) {
 		this.prevEstimatedRobotPose = prevEstimatedRobotPose;
 
-		if(this._estimatedRobotPose == null) {
+		/*if(this._estimatedRobotPose == null) {
 			return null;
-		}		
+		}*/		
 
 		return _estimatedRobotPose;
 	}
@@ -340,7 +342,11 @@ public class PhotonVision {
 		return 0.0;*/
 
 		//return PhotonUtils.getDistanceToPose(_estimatedRobotPose, );
-		return PhotonUtils.getDistanceToPose(_estimatedRobotPose.estimatedPose.toPose2d(), _aprilTagFieldLayout.getTagPose(targetNumber).get().toPose2d());
+		if(_estimatedRobotPose != null) {
+			return PhotonUtils.getDistanceToPose(_estimatedRobotPose.estimatedPose.toPose2d(), _aprilTagFieldLayout.getTagPose(targetNumber).get().toPose2d());
+		}
+
+		return -1;
 	}
 
 	public double getTargetDistance() {

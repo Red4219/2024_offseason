@@ -27,15 +27,20 @@ public class LED {
 
         switch(ledStatus) {
             case ready:
+                //System.out.println("setting led to ready");
                 pwm.setPulseTimeMicroseconds(1855);
                 break;
             case problem:
-                pwm.setPulseTimeMicroseconds(1795);
+                //System.out.println("setting led to problem");
+                //pwm.setPulseTimeMicroseconds(1795);
+                pwm.setPulseTimeMicroseconds(1345);
                 break;
             case targetAquired:
+                //System.out.println("setting led to targetAquired");
                 pwm.setPulseTimeMicroseconds(1475);
                 break;
             case targetSearching:
+                //System.out.println("setting led to targetSearching");
                 pwm.setPulseTimeMicroseconds(1345);
                 break;
             default:

@@ -92,12 +92,19 @@ public class RobotContainer {
 	// this is for testing
 	private static void selected(Command c) {
 		
-		PathPlannerAuto p = (PathPlannerAuto) c;
-		var t = PathPlannerAuto.getPathGroupFromAutoFile(p.getName()).get(0).getAllPathPoints().get(0);
+		try {
+			if(c instanceof PathPlannerAuto) {
+				PathPlannerAuto p = (PathPlannerAuto) c;
+				var t = PathPlannerAuto.getPathGroupFromAutoFile(p.getName()).get(0).getAllPathPoints().get(0);
 
-		System.out.println("Name: " + p.getName() + " x:" + t.position.getX() + " y: " + t.position.getY() + " rotation: " + t.rotationTarget.getTarget().getDegrees());
-
-		RobotContainer.driveSubsystem.setStartPosition(new Pose2d(t.position, t.rotationTarget.getTarget()));
+				if(t != null && t.position != null && t.rotationTarget != null) {
+					System.out.println("Name: " + p.getName() + " x:" + t.position.getX() + " y: " + t.position.getY() + " rotation: " + t.rotationTarget.getTarget().getDegrees());
+					RobotContainer.driveSubsystem.setStartPosition(new Pose2d(t.position, t.rotationTarget.getTarget()));
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void configureBindings() {

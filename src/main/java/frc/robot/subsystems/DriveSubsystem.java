@@ -95,6 +95,8 @@ public class DriveSubsystem extends SubsystemBase {
 	private double[] combinedEstimatedPoseArray = new double[9];
 	private boolean setupAuto = false;
 	private Pose2d startPosition = null;
+	private boolean limeLightCanSeeTag = false;
+	private boolean photonVisionCanSeeTag = false;
 
 
 	// test for auto positioning
@@ -519,16 +521,25 @@ public class DriveSubsystem extends SubsystemBase {
 			phoneEstimatedRobotPose = _photonVision.getPose(poseEstimator.getEstimatedPosition());
 
 			if(phoneEstimatedRobotPose != null) {
-				poseEstimator.addVisionMeasurement(
-					phoneEstimatedRobotPose.estimatedPose.toPose2d(),
-					Timer.getFPGATimestamp() - phoneEstimatedRobotPose.timestampSeconds,
-					visionMeasurementStdDevs
-				);
 
-				// update the combined
-				combinedEstimatedPoseArray[6] = phoneEstimatedRobotPose.estimatedPose.getX();
-				combinedEstimatedPoseArray[7] = phoneEstimatedRobotPose.estimatedPose.getY();
-				combinedEstimatedPoseArray[8] = phoneEstimatedRobotPose.estimatedPose.getRotation().toRotation2d().getDegrees();
+				if(phoneEstimatedRobotPose.targetsUsed.size() >= 1) {
+					poseEstimator.addVisionMeasurement(
+						phoneEstimatedRobotPose.estimatedPose.toPose2d(),
+						Timer.getFPGATimestamp() - phoneEstimatedRobotPose.timestampSeconds,
+						visionMeasurementStdDevs
+					);
+					photonVisionCanSeeTag = true;
+
+					// update the combined
+					combinedEstimatedPoseArray[6] = phoneEstimatedRobotPose.estimatedPose.getX();
+					combinedEstimatedPoseArray[7] = phoneEstimatedRobotPose.estimatedPose.getY();
+					combinedEstimatedPoseArray[8] = phoneEstimatedRobotPose.estimatedPose.getRotation().toRotation2d().getDegrees();
+				} else {
+					photonVisionCanSeeTag = false;
+				}
+			} else {
+				photonVisionCanSeeTag = false;
+				System.out.println("phoneEstimatedRobotPose is null");
 			}
 		}
 
@@ -544,7 +555,11 @@ public class DriveSubsystem extends SubsystemBase {
 			// Did we get a measurement?
 			if(limelightMeasurement != null && limelightMeasurement.tagCount >= 1) {
 
-				RobotContainer.led1.setStatus(LEDStatus.ready);
+				/*if(!setupAuto) {
+					RobotContainer.led1.setStatus(LEDStatus.ready);
+				}*/
+
+				limeLightCanSeeTag = true;
 
      			poseEstimator.addVisionMeasurement(
          			limelightMeasurement.pose,
@@ -562,7 +577,8 @@ public class DriveSubsystem extends SubsystemBase {
 					resetOdometry(limelightMeasurement.pose);
 				}
 			} else {
-				RobotContainer.led1.setStatus(LEDStatus.targetSearching);
+				//RobotContainer.led1.setStatus(LEDStatus.targetSearching);
+				limeLightCanSeeTag = false;
 			}
 		}
 
@@ -597,7 +613,15 @@ public class DriveSubsystem extends SubsystemBase {
 		RobotContainer.field.setRobotPose(odometry.getPoseMeters());
 
 		// this needs to be fixed to show if we are in the area of the selected auto position
-		if(setupAuto && startPosition != null) {
+		/*if(setupAuto && startPosition != null) {
+			RobotContainer.led1.setStatus(LEDStatus.problem);
+		} else if(setupAuto && startPosition == null) {
+			RobotContainer.led1.setStatus(LEDStatus.problem);
+		}*/
+
+		if(photonVisionCanSeeTag || limeLightCanSeeTag) {
+			RobotContainer.led1.setStatus(LEDStatus.targetAquired);
+		} else {
 			RobotContainer.led1.setStatus(LEDStatus.problem);
 		}
 	}
