@@ -525,7 +525,8 @@ public class DriveSubsystem extends SubsystemBase {
 				if(phoneEstimatedRobotPose.targetsUsed.size() >= 1) {
 					poseEstimator.addVisionMeasurement(
 						phoneEstimatedRobotPose.estimatedPose.toPose2d(),
-						Timer.getFPGATimestamp() - phoneEstimatedRobotPose.timestampSeconds,
+						//Timer.getFPGATimestamp() - phoneEstimatedRobotPose.timestampSeconds,
+						phoneEstimatedRobotPose.timestampSeconds,
 						visionMeasurementStdDevs
 					);
 					photonVisionCanSeeTag = true;
@@ -539,7 +540,7 @@ public class DriveSubsystem extends SubsystemBase {
 				}
 			} else {
 				photonVisionCanSeeTag = false;
-				System.out.println("phoneEstimatedRobotPose is null");
+				//System.out.println("phoneEstimatedRobotPose is null");
 			}
 		}
 
