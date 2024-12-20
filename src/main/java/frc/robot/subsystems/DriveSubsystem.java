@@ -57,6 +57,9 @@ import com.kauailabs.navx.frc.AHRS;
 import edu.wpi.first.wpilibj.SPI;
 import edu.wpi.first.wpilibj.RobotBase;
 
+import frc.robot.Mechanisms.LED;
+import frc.robot.Mechanisms.LED.LEDStatus;
+
 
 public class DriveSubsystem extends SubsystemBase {
 
@@ -88,8 +91,10 @@ public class DriveSubsystem extends SubsystemBase {
 	// Odeometry class for tracking robot pose
 	private SwerveDriveOdometry odometry;
 
-	private Pose2d estimatedPose;
+	private Pose2d estimatedPose = new Pose2d();
 	private double[] combinedEstimatedPoseArray = new double[9];
+	private boolean setupAuto = false;
+	private Pose2d startPosition = null;
 
 
 	// test for auto positioning
@@ -285,6 +290,14 @@ public class DriveSubsystem extends SubsystemBase {
 		gyro.reset();
 
 		poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(.7,.7,9999999));
+	}
+
+	public void setupAuto(boolean setupAuto) {
+		this.setupAuto = setupAuto;
+	}
+
+	public void setStartPosition(Pose2d startPosition) {
+		this.startPosition = startPosition;
 	}
 
 	@Override
@@ -529,7 +542,10 @@ public class DriveSubsystem extends SubsystemBase {
 			limelightMeasurement = _limeLight.getPose2d(poseEstimator.getEstimatedPosition());
 
 			// Did we get a measurement?
-			if(limelightMeasurement != null  && limelightMeasurement.tagCount >= 1) {
+			if(limelightMeasurement != null && limelightMeasurement.tagCount >= 1) {
+
+				RobotContainer.led1.setStatus(LEDStatus.ready);
+
      			poseEstimator.addVisionMeasurement(
          			limelightMeasurement.pose,
          			limelightMeasurement.timestampSeconds
@@ -545,6 +561,8 @@ public class DriveSubsystem extends SubsystemBase {
 				if(!gyro.isMoving() && limelightMeasurement.tagCount >= 1) {
 					resetOdometry(limelightMeasurement.pose);
 				}
+			} else {
+				RobotContainer.led1.setStatus(LEDStatus.targetSearching);
 			}
 		}
 
@@ -573,11 +591,15 @@ public class DriveSubsystem extends SubsystemBase {
 
 		// Show the estimated position
 		Logger.recordOutput("Estimator/Robot", estimatedPose);
-
 		Logger.recordOutput("Odometry/Robot", odometry.getPoseMeters());
 
 		// Update the field with the location of the robot
 		RobotContainer.field.setRobotPose(odometry.getPoseMeters());
+
+		// this needs to be fixed to show if we are in the area of the selected auto position
+		if(setupAuto && startPosition != null) {
+			RobotContainer.led1.setStatus(LEDStatus.problem);
+		}
 	}
 
 	public void resetEncoders() {

@@ -4,17 +4,22 @@ import java.util.OptionalLong;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Tools.JoystickUtils;
 import frc.robot.Tools.Limelight;
 import frc.robot.Tools.PhotonVision;
 import frc.robot.Tools.Parts.PathBuilder;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.Mechanisms.LED;
 import frc.robot.commands.Autonomous.AimCommand;
 import frc.robot.commands.Autonomous.DelayCommand;
 import frc.robot.commands.Autonomous.DummyCommand;
@@ -30,7 +35,7 @@ public class RobotContainer {
 	public static final Limelight limelight = new Limelight();
 	public static final DriveSubsystem driveSubsystem = new DriveSubsystem();
 	public static final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
-	//public static final LimelightSubsystem limelightSubsystem = new LimelightSubsystem();
+	public static final LED led1 = new LED(1);
 	//private static final CommandXboxController operatorController = new CommandXboxController(1);
 
 	
@@ -41,7 +46,9 @@ public class RobotContainer {
 	private final CommandXboxController programmerController = new CommandXboxController(
 			OperatorConstants.kProgrammerControllerPort);
 
-	private SendableChooser<Command> autoChooser = new SendableChooser<>();;
+	private SendableChooser<Command> autoChooser = new SendableChooser<>();
+
+	private boolean setupAuto = false;
 
 	public SendableChooser<Command> getAutoChooser() {
 		return autoChooser;
@@ -74,9 +81,23 @@ public class RobotContainer {
 		// Add the chooser to the Shuffleboard to select which Auo to run
 		Shuffleboard.getTab("Autonomous").add("Auto", autoChooser);
 
-		/*if(Constants.kEnableLimelight) {
-			limelightSubsystem.setGyro(driveSubsystem.getGyro());
-		}*/
+		autoChooser.onChange(RobotContainer::selected);
+	}
+
+	public void setupAuto(boolean setupAuto) {
+		this.setupAuto = setupAuto;
+		RobotContainer.driveSubsystem.setupAuto(setupAuto);
+	}
+
+	// this is for testing
+	private static void selected(Command c) {
+		
+		PathPlannerAuto p = (PathPlannerAuto) c;
+		var t = PathPlannerAuto.getPathGroupFromAutoFile(p.getName()).get(0).getAllPathPoints().get(0);
+
+		System.out.println("Name: " + p.getName() + " x:" + t.position.getX() + " y: " + t.position.getY() + " rotation: " + t.rotationTarget.getTarget().getDegrees());
+
+		RobotContainer.driveSubsystem.setStartPosition(new Pose2d(t.position, t.rotationTarget.getTarget()));
 	}
 
 	private void configureBindings() {

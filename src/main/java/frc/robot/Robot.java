@@ -52,7 +52,7 @@ public class Robot extends LoggedRobot {
 
 	@Override
 	public void disabledInit() {
-		
+		robotContainer.setupAuto(true);
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class Robot extends LoggedRobot {
 
 	@Override
 	public void autonomousInit() {
-
+		robotContainer.setupAuto(false);
 		autonomousCommand = robotContainer.getAutonomousCommand();
 
 		if (autonomousCommand != null) {
@@ -77,6 +77,7 @@ public class Robot extends LoggedRobot {
 
 	@Override
 	public void teleopInit() {
+		robotContainer.setupAuto(false);
 		if (autonomousCommand != null) {
 			autonomousCommand.cancel();
 		}
