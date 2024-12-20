@@ -35,7 +35,7 @@ public class RobotContainer {
 	public static final Limelight limelight = new Limelight();
 	public static final DriveSubsystem driveSubsystem = new DriveSubsystem();
 	public static final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
-	public static final LED led1 = new LED(1);
+	public static final LED led1 = new LED(0);
 	//private static final CommandXboxController operatorController = new CommandXboxController(1);
 
 	

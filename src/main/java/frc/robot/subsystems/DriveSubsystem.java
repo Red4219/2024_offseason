@@ -524,12 +524,12 @@ public class DriveSubsystem extends SubsystemBase {
 					Timer.getFPGATimestamp() - phoneEstimatedRobotPose.timestampSeconds,
 					visionMeasurementStdDevs
 				);
-			}
 
-			// update the combined
-			combinedEstimatedPoseArray[6] = phoneEstimatedRobotPose.estimatedPose.getX();
-			combinedEstimatedPoseArray[7] = phoneEstimatedRobotPose.estimatedPose.getY();
-			combinedEstimatedPoseArray[8] = phoneEstimatedRobotPose.estimatedPose.getRotation().toRotation2d().getDegrees();
+				// update the combined
+				combinedEstimatedPoseArray[6] = phoneEstimatedRobotPose.estimatedPose.getX();
+				combinedEstimatedPoseArray[7] = phoneEstimatedRobotPose.estimatedPose.getY();
+				combinedEstimatedPoseArray[8] = phoneEstimatedRobotPose.estimatedPose.getRotation().toRotation2d().getDegrees();
+			}
 		}
 
 		if (Constants.kEnableLimelight) {

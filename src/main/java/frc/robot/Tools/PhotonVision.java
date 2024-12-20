@@ -131,7 +131,7 @@ public class PhotonVision {
 			}
 
 			// Create the elements in Shuffleboard for debugging if debugPhotonVision is true 
-			if (Constants.debugPhotonVision == true) {
+			if (_camera.isConnected() && Constants.debugPhotonVision == true) {
 				photonVisionTab = Shuffleboard.getTab("PhotonVision");
 
 				photonVisionTab.addDouble("Target Distance", this::getTargetDistance);
@@ -179,9 +179,12 @@ public class PhotonVision {
 
 							///////////////
 
-							Logger.recordOutput(
+							if(allTagPoses != null) {
+
+								Logger.recordOutput(
 									"AprilTagVision/TargetsUsed",
 									allTagPoses.toArray(new Pose3d[allTagPoses.size()]));
+							}
 
 							/////////
 
@@ -302,7 +305,7 @@ public class PhotonVision {
 			return false;
 		}*/
 
-		if(!_estimatedRobotPose.targetsUsed.isEmpty()) {
+		if(_estimatedRobotPose != null && !_estimatedRobotPose.targetsUsed.isEmpty()) {
 			return true;
 		}
 
