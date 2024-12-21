@@ -83,7 +83,7 @@ public class DriveSubsystem extends SubsystemBase {
 	private double rot = 0.0;
 
 	private kDriveModes mode = kDriveModes.NORMAL;
-	private int speakerTarget = 0;
+	//private int speakerTarget = 0;
 	private boolean targetLocked = false;
 	private boolean isSim = false;
 	private LimelightHelpers.PoseEstimate limelightMeasurement = null;
@@ -321,8 +321,8 @@ public class DriveSubsystem extends SubsystemBase {
 		//Logger.recordOutput("Odometry/Robot", odometry.getPoseMeters());
 
 		// Show the estimated position
-		//estimatedPose = poseEstimator.getEstimatedPosition();
-		//Logger.recordOutput("Estimator/Robot", poseEstimator.getEstimatedPosition());
+		estimatedPose = poseEstimator.getEstimatedPosition();
+		Logger.recordOutput("Estimator/Robot", estimatedPose);
 
 		combinedEstimatedPoseArray[0] = estimatedPose.getX();
 		combinedEstimatedPoseArray[1] = estimatedPose.getY();
@@ -540,7 +540,6 @@ public class DriveSubsystem extends SubsystemBase {
 				}
 			} else {
 				photonVisionCanSeeTag = false;
-				//System.out.println("phoneEstimatedRobotPose is null");
 			}
 		}
 
@@ -607,11 +606,12 @@ public class DriveSubsystem extends SubsystemBase {
 		}
 
 		// Show the estimated position
-		Logger.recordOutput("Estimator/Robot", estimatedPose);
+		//Logger.recordOutput("Estimator/Robot", poseEstimator.getEstimatedPosition());
 		Logger.recordOutput("Odometry/Robot", odometry.getPoseMeters());
 
 		// Update the field with the location of the robot
-		RobotContainer.field.setRobotPose(odometry.getPoseMeters());
+		//RobotContainer.field.setRobotPose(odometry.getPoseMeters());
+		RobotContainer.field.setRobotPose(poseEstimator.getEstimatedPosition());
 
 		// this needs to be fixed to show if we are in the area of the selected auto position
 		/*if(setupAuto && startPosition != null) {

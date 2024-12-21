@@ -32,8 +32,7 @@ public class LED {
                 break;
             case problem:
                 //System.out.println("setting led to problem");
-                //pwm.setPulseTimeMicroseconds(1795);
-                pwm.setPulseTimeMicroseconds(1345);
+                pwm.setPulseTimeMicroseconds(1795);
                 break;
             case targetAquired:
                 //System.out.println("setting led to targetAquired");

@@ -67,6 +67,7 @@ public class PhotonVision {
 	private NetworkTableInstance networkTableInstance = NetworkTableInstance.getDefault();
 
 	private boolean isSim = false;
+	Optional<EstimatedRobotPose> o = null;
 	
 	public PhotonVision() {
 
@@ -134,7 +135,7 @@ public class PhotonVision {
 			if (_camera.isConnected() && Constants.debugPhotonVision == true) {
 				photonVisionTab = Shuffleboard.getTab("PhotonVision");
 
-				photonVisionTab.addDouble("Target Distance", this::getTargetDistance);
+				//photonVisionTab.addDouble("Target Distance", this::getTargetDistance);
 				photonVisionTab.addBoolean("Connection", this::isConnected);
 				photonVisionTab.addBoolean("Has Target", this::hasTarget);
 				photonVisionTab.addString("Targets Used", this::targetsUsed);
@@ -273,11 +274,7 @@ public class PhotonVision {
 	public EstimatedRobotPose getPose(Pose2d prevEstimatedRobotPose) {
 		this.prevEstimatedRobotPose = prevEstimatedRobotPose;
 
-		Optional<EstimatedRobotPose> o = getPhotonPose(prevEstimatedRobotPose);
-
-		/*if(this._estimatedRobotPose == null) {
-			return null;
-		}*/
+		o = getPhotonPose(prevEstimatedRobotPose);
 
 		if (isSim) {
 			// Update PhotonVision based on our new robot position.
@@ -290,13 +287,24 @@ public class PhotonVision {
 
 			for (PhotonTrackedTarget target : _estimatedRobotPose.targetsUsed) {
 				allTagPoses.add(
-						_aprilTagFieldLayout.getTagPose(target.getFiducialId()).get());
+					_aprilTagFieldLayout.getTagPose(target.getFiducialId()).get()
+				);
 			}
 
 			if (Constants.debugPhotonVision) {
 				RobotContainer.field.getObject("PhotonEstimatedRobot")
-						.setPose(_estimatedRobotPose.estimatedPose.toPose2d());
+					.setPose(_estimatedRobotPose.estimatedPose.toPose2d());
 			}
+
+			//Logger.recordOutput(
+			// 	"AprilTagVision/TargetsUsed",
+			// 	allTagPoses.toArray(new Pose3d[allTagPoses.size()]));
+
+			Logger.recordOutput(
+			 	"AprilTagVision/TargetsUsed",
+			 	allTagPoses.toArray(new Pose3d[allTagPoses.size()])
+			);
+			
 
 		} else {
 			// System.out.println("PhonVision::getPose() - I don't see any tags");
@@ -330,15 +338,6 @@ public class PhotonVision {
 	// Does Photonvision have a target?
 	public boolean hasTarget() {		
 
-		/*try {
-			if(_camera.getLatestResult().hasTargets()) {
-				return true;
-			}
-		} catch (Exception e) {
-			System.out.println("PhotonVision::hasTarget() - " + e.getMessage());
-			return false;
-		}*/
-
 		if(_estimatedRobotPose != null && !_estimatedRobotPose.targetsUsed.isEmpty()) {
 			return true;
 		}
@@ -348,40 +347,17 @@ public class PhotonVision {
 
 	// How far is the specified target
 	public double targetDistance(int targetNumber) {
-
-		/*try {
-			PhotonPipelineResult result = _camera.getLatestResult();
-			List<PhotonTrackedTarget> targets = result.getTargets();
-
-			for (PhotonTrackedTarget target : targets) {
-				if (target.getFiducialId() == targetNumber) {
-
-					double range = PhotonUtils.calculateDistanceToTargetMeters(
-							Constants.PhotonVisionConstants.camHeightOffGround,
-							_aprilTagFieldLayout.getTagPose(targetNumber).get().getZ(),
-							// Constants.PhotonVisionConstants.TagHeight,
-							Constants.PhotonVisionConstants.camPitch,
-							Units.degreesToRadians(result.getBestTarget().getPitch()));
-
-					return range;
-				}
-			}
-		} catch (Exception e) {
-			System.out.println("PhotonVision::targetDistance() - " + e.getMessage());
-			return 0.0;
-		}
-
-		return 0.0;*/
-
-		//return PhotonUtils.getDistanceToPose(_estimatedRobotPose, );
 		if(_estimatedRobotPose != null) {
-			return PhotonUtils.getDistanceToPose(_estimatedRobotPose.estimatedPose.toPose2d(), _aprilTagFieldLayout.getTagPose(targetNumber).get().toPose2d());
+			return PhotonUtils.getDistanceToPose(
+				_estimatedRobotPose.estimatedPose.toPose2d(),
+				_aprilTagFieldLayout.getTagPose(targetNumber).get().toPose2d()
+			);
 		}
 
 		return -1;
 	}
 
-	public double getTargetDistance() {
+	/*public double getTargetDistance() {
 		double distance = 0.0;
 
 		if(_estimatedRobotPose != null) {
@@ -414,7 +390,7 @@ public class PhotonVision {
 		}
 		
 		return distance;
-	}
+	}*/
 
 	// Aim at the specified target
 	public double aimAtTarget(int targetNumber) {
@@ -493,15 +469,8 @@ public class PhotonVision {
 								"PhotonVisionEstimator/Robot",
 								_lastPhotonPoseEstimatorPose);
 
-						// use _lastPhotonPoseEstimatorPose since we assigned it earlier
-						/*poseArray[0] = _lastPhotonPoseEstimatorPose.getX();
-						poseArray[1] = _lastPhotonPoseEstimatorPose.getY();
-						poseArray[2] = _lastPhotonPoseEstimatorPose.getRotation().getAngle();
 						
-						Logger.recordOutput(
-							"PhotonVisionEstimator/position",
-							poseArray
-						);*/
+
 					} catch (Exception e) {
 						System.out.println(e.toString());
 					}
@@ -511,21 +480,12 @@ public class PhotonVision {
 							"PhotonVisionEstimator/Robot",
 							_lastPhotonPoseEstimatorPose);
 
-					/*poseArray[0] = _lastPhotonPoseEstimatorPose.getX();
-					poseArray[1] = _lastPhotonPoseEstimatorPose.getY();
-					poseArray[2] = _lastPhotonPoseEstimatorPose.getRotation().getAngle();
-						
-					Logger.recordOutput(
-						"PhotonVisionEstimator/position",
-						poseArray
-					);*/
-
 					return Optional.empty();
 				}
 
 				return estimatedRobotPose;
 			} else {
-				System.out.println("getPhotonPose() - _photonPoseEstimator is null");
+				//System.out.println("getPhotonPose() - _photonPoseEstimator is null");
 
 				if (_camera != null) {
 					if (_camera.isConnected()) {
@@ -533,7 +493,8 @@ public class PhotonVision {
 								_aprilTagFieldLayout,
 								Constants.PhotonVisionConstants.poseStrategy,
 								_camera,
-								Constants.PhotonVisionConstants.cameraToRobot);
+								Constants.PhotonVisionConstants.cameraToRobot
+						);
 					} else {
 						System.out.println("-------> the camera is not connected");
 					}
